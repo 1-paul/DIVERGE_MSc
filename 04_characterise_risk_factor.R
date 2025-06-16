@@ -34,14 +34,11 @@ results_list <- list()
 for (symptom in symptoms) {
   # Create formula
   formula <- as.formula(paste0("as.ordered(", symptom, ") ~ ", predictor, "+ screener_age"))
-  
   # Fit ordinal logistic regression model
   model <- polr(formula, data = cases, Hess = TRUE)
   smry <- summary(model)
-  
   # Extract coefficient table
   coef_table <- coef(smry)
-  
   # Check if predictor is in the model (defensive programming)
   if (predictor %in% rownames(coef_table)) {
     estimate <- exp(coef_table[predictor, "Value"])  # Odds ratio (exponentiated coefficient)
@@ -51,7 +48,6 @@ for (symptom in symptoms) {
     estimate <- NA
     p_value <- NA
   }
-
   # Store result
   results_list[[length(results_list) + 1]] <- data.frame(
     Symptom = symptom,
@@ -63,12 +59,12 @@ for (symptom in symptoms) {
 
 # Combine all results into a dataframe
 results_df <- do.call(rbind, results_list)
-
 # Adjust p-values for multiple testing (Bonferroni)
 results_df$Adjusted_P <- p.adjust(results_df$P_Value, method = "bonferroni")
-
 # Print results
 print(results_df)
+
+
 
 ### Plot Age of Onset ~ Early domestic issues
 cases <- cases %>%
