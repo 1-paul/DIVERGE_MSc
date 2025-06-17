@@ -24,7 +24,22 @@ gwas_results_snps <- gwas_results_snps %>%
 
 
 
-### Manhattan & QQ plot using qqman package
+### Filter out rare variants ---------------------------------------------------------
+frq_data <- read.table("/cluster/project2/DIVERGE/munim_workspace/QC_pipeline/02_maf/divrg_mrgd_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
+
+common_variants <- frq_data %>% 
+	filter(MAF >= 0.05) %>%  # Filter out MAF < 5%
+	select(SNP)        
+
+# View the first few results
+head(common_variants)
+
+gwas_results_snps <- gwas_results_snps %>%
+	filter(ID %in% low_maf_snps$SNP)
+
+
+
+### Manhattan & QQ plot using qqman package ---------------------------------------------------------
 
 manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P")
 
@@ -67,7 +82,7 @@ ggplot(don, aes(x=BPcum, y=-log10(P))) +
 
 
 
-### Evaluate PCs
+### Evaluate PCs ---------------------------------------------------------
 ## Summarise Mean, Median, Max, Min
 
 gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/gwas_results.PHENO1.glm.logistic")
@@ -100,7 +115,7 @@ gwas_results_all %>%
 
 
 
-### Null model with PCs
+### Null model with PCs ---------------------------------------------------------
 ## Load PCs
 pc_results_all <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/covariates.txt")
 colnames(pc_results_all) <- c("FID", "IID", "SEX", "PHENO1", "FID2", "IID2", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8")
