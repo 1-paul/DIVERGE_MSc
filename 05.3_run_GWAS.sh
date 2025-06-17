@@ -17,5 +17,5 @@
   --covar covariates.txt \
   --covar-name SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8 \
   --glm \
-  --out gwas_results [pbrandes@pchuckle 20250605_GWAS]
+  --out gwas_results
   
