@@ -31,7 +31,7 @@ with open(fam_file, 'r') as fin, open(output_fam, 'w') as fout:
 print(f"Updated .fam file written to {output_fam}")
 
 
-#----------------------------------------------------------------------------------------------------------------------
+### New Version with added early_domestic_issues ----------------------------------------------------------------------------------------------------------------------
 
 
 import csv
@@ -40,7 +40,7 @@ import csv
 fam_file = 'DIVERGE_QCed.fam'
 pheno_file = '/cluster/project2/DIVERGE/munim_workspace/QC_pipeline_20250514/07_PCA/DIVERGE-DIVERGEGenotypeQC_DATA_LABELS_2025-04-23_1334.csv'
 domestic_issues_file = '/SAN/ugi/ukhls/Paul_MS_proj/DIVERGE-PaulBrandesProject_DATA_2025-05-28_1315.csv'
-output_fam = 'DIVERGE_QCed.fam'
+output_fam = 'DIVERGE_QCed_new.fam'
 
 # Read phenotype file (case/control status)
 pheno_dict = {}
