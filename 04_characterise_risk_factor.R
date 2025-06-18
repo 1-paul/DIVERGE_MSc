@@ -1,11 +1,15 @@
+#############################################################################################
+### Characterize if, and in which way, the risk factor affects the severity of depression ###
+#############################################################################################
+
 library(MASS)
 library(dplyr)
 
-# Filter cases
+### Define cases and symptoms -----------------------------------------------------------------------------
+
 cases <- phenotype %>%
   filter(subject_type == 1)
 
-# Define symptoms
 symptoms <- c(
   "dip_op37_dysphoria",
   "dip_op39_anhedonia",
@@ -21,11 +25,20 @@ symptoms <- c(
   "dip_op44_insomn_initial",
   "dip_op46_insomn_terminal",
   "dip_op47_excess_sleep",
-  "dip_op90_course"
+  "dip_op90_course",
+  "sbq_suicide_idea_behav",
+  "suicide_attempts_times",
+  "sbq_suicide_thought",
+  "sbq_suicide_told_smb"
 )
 
-# Define predictor
+# Define risk factor
 predictor <- "early_domestic_issues"
+
+
+
+### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
+## ordinal logistic regressions since all the indicators of severity are ordered categorical variable e.g. "Low," "Medium," "High" 
 
 # Initialize results list
 results_list <- list()
@@ -39,7 +52,7 @@ for (symptom in symptoms) {
   smry <- summary(model)
   # Extract coefficient table
   coef_table <- coef(smry)
-  # Check if predictor is in the model (defensive programming)
+  # Check if predictor is in the model
   if (predictor %in% rownames(coef_table)) {
     estimate <- exp(coef_table[predictor, "Value"])  # Odds ratio (exponentiated coefficient)
     t_value <- coef_table[predictor, "t value"]
@@ -59,14 +72,25 @@ for (symptom in symptoms) {
 
 # Combine all results into a dataframe
 results_df <- do.call(rbind, results_list)
-# Adjust p-values for multiple testing (Bonferroni)
+
+# Adjust p-values for multiple testing (Bonferroni) 
 results_df$Adjusted_P <- p.adjust(results_df$P_Value, method = "bonferroni")
 # Print results
 print(results_df)
 
 
 
-### Plot Age of Onset ~ Early domestic issues
+### Regression for Age of Onset -------------------------------------------------------------------------------------
+# Filter cases with invalid Ages of Onset
+cases <- cases %>%
+	filter(age_onset < 200)
+
+model <- lm(age_onset ~ early_domestic_issues + screener_age, data = cases)
+summary(model)
+
+
+
+### Plot Age of Onset ~ Early domestic issues ---------------------------------------------------------------------------------
 cases <- cases %>%
 	filter(!is.na(early_domestic_issues))
 
@@ -90,3 +114,6 @@ ggplot(cases, aes(x = age_onset, fill = early_domestic_issues)) +
 		values = c("No Early Domestic Issues" = "#4dac26", "Early Domestic Issues" = "#d01c8b")
 	) +
 	theme_minimal()
+
+
+
