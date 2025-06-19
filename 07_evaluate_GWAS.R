@@ -7,20 +7,18 @@ gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/snp_res
 
 colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
-gwas_results_snps$CHROM <- as.numeric(gwas_results_snps$CHROM)
-
 gwas_results_snps <- gwas_results_snps %>% 
-	filter(!is.na(CHROM))
+	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
+	filter(!is.na(CHROM)) %>%
+	filter(CHROM != 0) %>%
+	mutate(CHROM = as.numeric(CHROM))
+
+# Autosomes only:
+# gwas_results_snps <- gwas_results_snps %>%
+#  filter(CHROM %in% as.character(1:22)) 
 
 gwas_results_snps <- gwas_results_snps %>%
-	filter(
-		!is.na(P),          # Remove NA
-		P > 0,              # Remove negative/zero
-	    	!is.infinite(P)     # Remove infinite
-	) %>%
-	mutate(
-		P = if_else(P > 1, 1, P)  # Cap at 1 if any P > 1 exists
-	)
+	filter(!is.na(P))
 
 
 
@@ -34,7 +32,7 @@ significant_hits <- gwas_results_snps %>%
 significant_hits_maf <- frq_data %>% 
 	filter(SNP %in% significant_hits$ID)
 
-### Filter out rare variants ---------------------------------------------------------
+# Filter out rare variants 
 common_variants <- frq_data %>% 
 	filter(MAF >= 0.05)  # Filter out MAF < 5%
 	
@@ -44,6 +42,7 @@ gwas_results_snps <- gwas_results_snps %>%
 # Get significant hits of common variants
 significant_common_hits_maf <- gwas_results_snps %>%
 	filter(P < 0.00001) 	
+
 
 
 ### Manhattan & QQ plot using qqman package ---------------------------------------------------------
