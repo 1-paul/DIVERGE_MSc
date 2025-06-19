@@ -15,8 +15,8 @@ gwas_results_snps <- gwas_results_snps %>%
 gwas_results_snps <- gwas_results_snps %>%
 	filter(
 		!is.na(P),          # Remove NA
-	    P > 0,              # Remove negative/zero
-	    !is.infinite(P)     # Remove infinite
+		P > 0,              # Remove negative/zero
+	    	!is.infinite(P)     # Remove infinite
 	) %>%
 	mutate(
 		P = if_else(P > 1, 1, P)  # Cap at 1 if any P > 1 exists
@@ -24,24 +24,33 @@ gwas_results_snps <- gwas_results_snps %>%
 
 
 
-### Filter out rare variants ---------------------------------------------------------
+### Get minor allele frequencies of significant variants --------------------------------------------------
 frq_data <- read.table("/cluster/project2/DIVERGE/munim_workspace/QC_pipeline/02_maf/divrg_mrgd_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
 
+significant_hits <- gwas_results_snps %>%
+	filter(P < 0.00001) %>%
+	select(ID)
+
+significant_hits_maf <- frq_data %>% 
+	filter(SNP %in% significant_hits$ID)
+
+### Filter out rare variants ---------------------------------------------------------
 common_variants <- frq_data %>% 
-	filter(MAF >= 0.05) %>%  # Filter out MAF < 5%
-	select(SNP)        
-
-# View the first few results
-head(common_variants)
-
+	filter(MAF >= 0.05)  # Filter out MAF < 5%
+	
 gwas_results_snps <- gwas_results_snps %>%
-	filter(ID %in% low_maf_snps$SNP)
+	filter(ID %in% common_variants$SNP)
 
+# Get significant hits of common variants
+significant_common_hits_maf <- gwas_results_snps %>%
+	filter(P < 0.00001) 	
 
 
 ### Manhattan & QQ plot using qqman package ---------------------------------------------------------
 
+# png("manhattan_plot.png", width=1200, height=600) 
 manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P")
+# dev.off()
 
 qq(gwas_results_snps$P, main = "Q-Q plot of GWAS p-values")
 
@@ -84,7 +93,6 @@ ggplot(don, aes(x=BPcum, y=-log10(P))) +
 
 ### Evaluate PCs ---------------------------------------------------------
 ## Summarise Mean, Median, Max, Min
-
 gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/gwas_results.PHENO1.glm.logistic")
 
 colnames(gwas_results_all) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
