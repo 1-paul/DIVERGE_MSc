@@ -23,7 +23,7 @@ gwas_results_snps <- gwas_results_snps %>%
 
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
-frq_data <- read.table("/cluster/project2/DIVERGE/munim_workspace/QC_pipeline/02_maf/divrg_mrgd_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
+frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
 
 significant_hits <- gwas_results_snps %>%
 	filter(P < 0.00001) %>%
