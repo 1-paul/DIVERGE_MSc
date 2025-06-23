@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyr)
 library(qqman)
 
-gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results_snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
@@ -92,7 +92,7 @@ ggplot(don, aes(x=BPcum, y=-log10(P))) +
 
 ### Evaluate PCs ---------------------------------------------------------
 ## Summarise Mean, Median, Max, Min
-gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/gwas_results.PHENO1.glm.logistic")
+gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic")
 
 colnames(gwas_results_all) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
