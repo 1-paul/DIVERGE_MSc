@@ -9,17 +9,10 @@ colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST
 
 gwas_results_snps <- gwas_results_snps %>% 
 	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
-	filter(!is.na(CHROM)) %>%
 	filter(CHROM != 0) %>%
-	mutate(CHROM = as.numeric(CHROM))
-
-# Autosomes only:
-# gwas_results_snps <- gwas_results_snps %>%
-#  filter(CHROM %in% as.character(1:22)) 
-
-gwas_results_snps <- gwas_results_snps %>%
+	mutate(CHROM = as.numeric(CHROM)) %>%
+	filter(CHROM <= 22) %>% # Autosomes only
 	filter(!is.na(P))
-
 
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
@@ -48,7 +41,7 @@ significant_common_hits_maf <- gwas_results_snps %>%
 ### Manhattan & QQ plot using qqman package ---------------------------------------------------------
 
 # png("manhattan_plot.png", width=1200, height=600) 
-manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P")
+manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#d01c8b", "#980043"), ymax = 10)
 # dev.off()
 
 qq(gwas_results_snps$P, main = "Q-Q plot of GWAS p-values")
