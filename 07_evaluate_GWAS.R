@@ -3,7 +3,7 @@ library(ggplot2)
 library(tidyr)
 library(qqman)
 
-gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
@@ -92,7 +92,7 @@ ggplot(don, aes(x=BPcum, y=-log10(P))) +
 
 ### Evaluate PCs ---------------------------------------------------------
 ## Summarise Mean, Median, Max, Min
-gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/gwas_results.PHENO1.glm.logistic")
+gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/gwas_results.PHENO1.glm.logistic")
 
 colnames(gwas_results_all) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
@@ -124,7 +124,7 @@ gwas_results_all %>%
 
 ### Null model with PCs ---------------------------------------------------------
 ## Load PCs
-pc_results_all <- read.table("/cluster/project2/DIVERGE/20250605_GWAS/covariates.txt")
+pc_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/covariates.txt")
 colnames(pc_results_all) <- c("FID", "IID", "SEX", "PHENO1", "FID2", "IID2", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8")
 
 ## Match them with phenotypic data
