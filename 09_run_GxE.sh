@@ -4,7 +4,7 @@
 #$ -l h_vmem=30G
 #$ -cwd
 #$ -j y
-#$ -N run_GWAS
+#$ -N run_GxE
 
 #/share/apps/plink-1.90-beta-6.10/plink --bfile DIVERGE_QCed --logistic --out gwas_results
 
