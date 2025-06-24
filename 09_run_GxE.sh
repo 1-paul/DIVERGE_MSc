@@ -13,9 +13,9 @@
   --pheno covariates2.txt \
   --pheno-name PHENO1 \
   --covar covariates2.txt \
-  --covar-name early_domestic_issues,SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8 \
-  --parameters 1, 3-12, 13 \
+  --covar-name SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,early_domestic_issues \
+  --parameters 1, 2-11, 21 \
   --glm interaction\
   --out gxe_results
 
-# 1, refers to Additive effect, 3-12 to the covariates, and 13 to the interaction between variants and early_domestic_issues
+# 1, refers to variants additive effect, 2-11 to the covariates, and 21 to the interaction between variants and early_domestic_issues
