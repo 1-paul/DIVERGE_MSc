@@ -32,6 +32,12 @@ combined_df <- combined_df %>%
   mutate(freeze = if_else(IID %in% freeze2_ids$IID, 2, 1))
 
 
+# Rename columns and remove unwanted columns
+combined_df <- combined_df %>%
+  rename("#FID" = X.FID) %>%  # Rename X.FID
+  select(-X.FID.1, -IID.1)  # Remove these columns
+
+
 # Output new covariates file
 write.table(combined_df, 
            "covariates2.txt", 
