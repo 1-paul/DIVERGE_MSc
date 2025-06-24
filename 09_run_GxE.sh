@@ -1,7 +1,7 @@
 #$ -S /bin/bash
 #$ -l h_rt=06:0:0
-#$ -l tmem=20G
-#$ -l h_vmem=20G
+#$ -l tmem=30G
+#$ -l h_vmem=30G
 #$ -cwd
 #$ -j y
 #$ -N run_GWAS
