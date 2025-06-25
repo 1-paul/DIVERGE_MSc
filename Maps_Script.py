@@ -58,7 +58,7 @@ gdf_Pakistan['Participants'] = participants
 ## plot the data -----------------------------------------------------
 fig, ax = plt.subplots(figsize=(15, 15))
 
-gdf_Pakistan.plot(ax=ax, column='Participants', legend=True, cmap='Reds', legend_kwds={
+gdf_Pakistan.plot(ax=ax, column='Participants', legend=True, cmap='RdPu', legend_kwds={
         'shrink': 0.4,         # Shrink the size of the colorbar
         'aspect': 20,          # Adjust the aspect ratio
         'orientation': 'vertical',  # Orientation of the colorbar
