@@ -3,11 +3,11 @@ library(ggplot2)
 library(tidyr)
 library(qqman)
 
-gxe_results_snps <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results_snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+gxe_results_snps <- read.table("/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
+colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
-gwas_results_snps <- gwas_results_snps %>% 
+gxe_results_snps <- gxe_results_snps %>% 
 	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
 	filter(CHROM != 0) %>%
 	mutate(CHROM = as.numeric(CHROM)) %>%
@@ -18,7 +18,7 @@ gwas_results_snps <- gwas_results_snps %>%
 ### Get minor allele frequencies of significant variants --------------------------------------------------
 frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
 
-significant_hits <- gwas_results_snps %>%
+significant_hits <- gxe_results_snps %>%
 	filter(P < 0.00001) %>%
 	select(ID)
 
@@ -29,11 +29,11 @@ significant_hits_maf <- frq_data %>%
 common_variants <- frq_data %>% 
 	filter(MAF >= 0.05)  # Filter out MAF < 5%
 	
-gwas_results_snps <- gwas_results_snps %>%
+gxe_results_snps <- gxe_results_snps %>%
 	filter(ID %in% common_variants$SNP)
 
 # Get significant hits of common variants
-significant_common_hits_maf <- gwas_results_snps %>%
+significant_common_hits_maf <- gxe_results_snps %>%
 	filter(P < 0.00001) 	
 
 
