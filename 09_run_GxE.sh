@@ -19,3 +19,8 @@
   --out gxe_results
 
 # 1, refers to variants additive effect, 2-11 to the covariates, and 21 to the interaction between variants and early_domestic_issues
+
+
+
+### Filter for the main effects and interaction
+awk '$7 == "ADD" || $7 == "early_domestic_issues" || $7 == "ADDxearly_domestic_issues"' gxe_results.PHENO1.glm.logistic > gxe_results_snp_edm_snpxedm_results_only.txt
