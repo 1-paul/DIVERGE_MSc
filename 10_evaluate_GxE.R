@@ -18,13 +18,6 @@ gxe_results_snps <- gxe_results_snps %>%
 ### Get minor allele frequencies of significant variants --------------------------------------------------
 frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
 
-significant_hits <- gxe_results_snps %>%
-	filter(P < 0.00001) %>%
-	select(ID)
-
-significant_hits_maf <- frq_data %>% 
-	filter(SNP %in% significant_hits$ID)
-
 # Filter out rare variants 
 common_variants <- frq_data %>% 
 	filter(MAF >= 0.05)  # Filter out MAF < 5%
@@ -32,9 +25,14 @@ common_variants <- frq_data %>%
 gxe_results_snps <- gxe_results_snps %>%
 	filter(ID %in% common_variants$SNP)
 
-# Get significant hits of common variants
-significant_common_hits_maf <- gxe_results_snps %>%
-	filter(P < 0.00001) 	
+# Step 1: Get significant SNPs where TEST == "ADD" and P < 0.00001
+significant_snps <- gxe_results_snps %>%
+  filter(TEST == "ADD", P < 0.00001) %>%
+  pull(ID)  # Extract SNP IDs
+
+# Step 2: Filter all rows (ADD, early_domestic_issues, ADDxearly_domestic_issues) for those SNPs
+significant_results <- gxe_results_snps %>%
+  filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
 
 
 
