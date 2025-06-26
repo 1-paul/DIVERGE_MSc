@@ -77,3 +77,51 @@ plt.savefig(output_path, dpi=300, bbox_inches='tight')  # Adjust dpi for resolut
 
 # Show the plot
 plt.show()
+
+
+
+### Collection Center ---------------------------------------------------------------------
+cities = [
+    "Mardan, Pakistan", "Charsadda, Pakistan", "Swat, Pakistan", 
+    "Dera Ismail Khan, Pakistan", "Sahiwal, Pakistan", "Rahim Yar Khan, Pakistan", 
+    "Sialkot, Pakistan", "Sargodha, Pakistan", "Faisalabad, Pakistan", 
+    "Rawalpindi, Pakistan", "Islamabad, Pakistan", "Hyderabad, Pakistan", 
+    "Karachi, Pakistan", "Nawabshah, Pakistan", "Quetta, Pakistan", 
+    "Gujranwala, Pakistan", "Bahawalpur, Pakistan", "Abbottabad, Pakistan", 
+    "Lahore, Pakistan", "Jamshoro, Pakistan"
+]
+
+
+gdfs = []
+for city in cities:
+    gdf = ox.geocode_to_gdf(city, which_result=1)
+    gdfs.append(gdf)
+
+gdf_cities = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True))
+
+
+
+### Plot collection centers
+fig, ax = plt.subplots(figsize=(15, 15))
+
+# plot the data
+gdf_Pakistan.plot(ax=ax, legend=True, cmap='Set3', legend_kwds={
+        'shrink': 0.4,         # Shrink the size of the colorbar
+        'aspect': 20,          # Adjust the aspect ratio
+        'orientation': 'vertical',  # Orientation of the colorbar
+    }
+)
+
+gdf_cities["geometry"].centroid.plot(ax=ax, color='black')
+
+# Add title and province labels
+ax.set_title("Collection Points in Pakistan", fontsize=30, fontweight='bold')
+
+# Aesthetics
+ax.axis('off')
+
+# Save the plot to a file
+output_path = "collection_points.png"
+plt.savefig(output_path, dpi=300, bbox_inches='tight')
+
+plt.show()
