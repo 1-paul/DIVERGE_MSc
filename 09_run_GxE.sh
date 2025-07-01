@@ -13,7 +13,7 @@
   --pheno covariates2.txt \
   --pheno-name PHENO1 \
   --covar covariates2.txt \
-  --covar-name SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,early_domestic_issues \
+  --covar-name SEX,PC1,PC2,PC3,PC4,PC5,PC6,PC7,PC8,adversity_score \
   --parameters 1, 2-11, 21 \
   --glm interaction\
   --out gxe_results
@@ -23,4 +23,4 @@
 
 
 ### Filter for the main effects and interaction
-awk '$7 == "ADD" || $7 == "early_domestic_issues" || $7 == "ADDxearly_domestic_issues"' gxe_results.PHENO1.glm.logistic > gxe_results_snp_edi_snpxedi_results_only.txt
+# awk '$7 == "ADD" || $7 == "early_domestic_issues" || $7 == "ADDxearly_domestic_issues"' gxe_results.PHENO1.glm.logistic > gxe_results_snp_edi_snpxedi_results_only.txt
