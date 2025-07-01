@@ -35,8 +35,7 @@ combined_df <- combined_df %>%
 # Rename columns and remove unwanted columns
 combined_df <- combined_df %>%
   rename("#FID" = FID) %>%  # Rename X.FID
-  select("#FID", IID, everything()) %>%
-  select(-X.FID.1, -IID.1)  # Remove these columns
+  select("#FID", IID, everything())
 
 
 # Output new covariates file
