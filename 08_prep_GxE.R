@@ -3,7 +3,7 @@ library(dplyr)
 
 # Filter phenotype
 early_domestic_issues_df <- phenotype %>%
-    select(subject_id, early_domestic_issues)
+    select(subject_id, early_domestic_issues, adversity_score)
 
 
 # Load covariates file
