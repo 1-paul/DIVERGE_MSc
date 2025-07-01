@@ -8,7 +8,7 @@ early_domestic_issues_df <- phenotype %>%
 
 # Load covariates file
 covariates <- read.table(
-    "/cluster/project2/DIVERGE/20250605_GWAS/covariates.txt",
+    "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt",
     header = TRUE,
     sep = "\t",          
     comment.char = ""    # Disable skipping lines starting with #
