@@ -1,9 +1,28 @@
+#############################################################################################
+### Summary:
+### 1. Format all the GxE result files correctly
+### 2. Get the common SNPs with p-values above suggestive signficance
+### 3. Manhattan and QQ plot
+### 4. Evaluation of PCs and PC null model 
+#############################################################################################
+
+
+
 library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(qqman)
 
-gxe_results_snps <- read.table("/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# Define which files to use
+file_gxe_results_snps = "/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
+file_gxe_results_all = "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic"
+file_frq_data = "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
+file_pc_results = "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt
+
+
+
+### Correctly format GxE results -----------------------------------------------------------------------------
+gxe_results_snps <- read.table(file_gxe_results_snps, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
@@ -15,8 +34,9 @@ gxe_results_snps <- gxe_results_snps %>%
 	filter(!is.na(P))
 
 
+
 ### Get minor allele frequencies of significant variants --------------------------------------------------
-frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
+frq_data <- read.table(file_frq_data, header = TRUE, stringsAsFactors = FALSE)
 
 # Filter out rare variants 
 common_variants <- frq_data %>% 
@@ -25,14 +45,14 @@ common_variants <- frq_data %>%
 gxe_results_snps <- gxe_results_snps %>%
 	filter(ID %in% common_variants$SNP)
 
-# Step 1: Get significant SNPs where TEST == "ADD" and P < 0.00001
+# Get significant SNPs with TEST == "ADD" and P < 0.00001
 significant_snps <- gxe_results_snps %>%
-  filter(TEST == "ADD", P < 0.00001) %>%
-  pull(ID)  # Extract SNP IDs
+	filter(TEST == "ADD", P < 0.00001) %>%
+	pull(ID)  # Extract SNP IDs
 
-# Step 2: Filter all rows (ADD, early_domestic_issues, ADDxearly_domestic_issues) for those SNPs
+# Filter all rows (ADD, risk factor (e.g. early domestic issues), ADD x risk factor) for those SNPs
 significant_results <- gxe_results_snps %>%
-  filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
+	filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
 
 
 
@@ -83,7 +103,7 @@ ggplot(don, aes(x=BPcum, y=-log10(P))) +
 
 ### Evaluate PCs ---------------------------------------------------------
 ## Summarise Mean, Median, Max, Min
-gwas_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic")
+gwas_results_all <- read.table(file_gxe_results_all)
 
 colnames(gwas_results_all) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
 
@@ -115,11 +135,11 @@ gwas_results_all %>%
 
 ### Null model with PCs ---------------------------------------------------------
 ## Load PCs
-pc_results_all <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt")
-colnames(pc_results_all) <- c("FID", "IID", "SEX", "PHENO1", "FID2", "IID2", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8")
+pc_results <- read.table(file_pc_results")
+colnames(pc_results) <- c("FID", "IID", "SEX", "PHENO1", "FID2", "IID2", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8")
 
 ## Match them with phenotypic data
-combined_df <- merge(phenotype, pc_results_all, by.x = "subject_id", , by.y = "IID")
+combined_df <- merge(phenotype, pc_results, by.x = "subject_id", , by.y = "IID")
 
 ## Run the null model
 model <- glm(subject_type_logical ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8, data = combined_df, family = binomial)
