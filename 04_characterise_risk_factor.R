@@ -1,9 +1,12 @@
 #############################################################################################
-### Characterize if, and in which way, the risk factor affects the severity of depression ###
+### Summary:
+### 1. Definition of cases, symptoms, and risk factor
 #############################################################################################
+
 
 library(MASS)
 library(dplyr)
+
 
 ### Define cases and symptoms -----------------------------------------------------------------------------
 
@@ -38,36 +41,36 @@ predictor <- "early_domestic_issues"
 
 
 ### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
-## ordinal logistic regressions since all the indicators of severity are ordered categorical variable e.g. "Low," "Medium," "High" 
+## An ordinal logistic regressions is necessary since all the indicators of severity are ordered categorical variable e.g. "Low," "Medium," "High" 
 
 # Initialize results list
 results_list <- list()
 
 # Loop over each symptom
 for (symptom in symptoms) {
-  # Create formula
-  formula <- as.formula(paste0("as.ordered(", symptom, ") ~ ", predictor, "+ screener_age"))
-  # Fit ordinal logistic regression model
-  model <- polr(formula, data = cases, Hess = TRUE)
-  smry <- summary(model)
-  # Extract coefficient table
-  coef_table <- coef(smry)
-  # Check if predictor is in the model
-  if (predictor %in% rownames(coef_table)) {
-    estimate <- exp(coef_table[predictor, "Value"])  # Odds ratio (exponentiated coefficient)
-    t_value <- coef_table[predictor, "t value"]
-    p_value <- 2 * (1 - pnorm(abs(t_value)))        # Wald test p-value
-  } else {
-    estimate <- NA
-    p_value <- NA
-  }
-  # Store result
-  results_list[[length(results_list) + 1]] <- data.frame(
-    Symptom = symptom,
-    Predictor = predictor,
-    Estimate = estimate,
-    P_Value = p_value
-  )
+	# Create formula
+	formula <- as.formula(paste0("as.ordered(", symptom, ") ~ ", predictor, "+ screener_age"))
+	# Fit ordinal logistic regression model
+	model <- polr(formula, data = cases, Hess = TRUE)
+	smry <- summary(model)
+	# Extract coefficient table
+	coef_table <- coef(smry)
+	# Check if predictor is in the model
+	if (predictor %in% rownames(coef_table)) {
+		estimate <- exp(coef_table[predictor, "Value"])  # Odds ratio (exponentiated coefficient)
+    		t_value <- coef_table[predictor, "t value"]
+		p_value <- 2 * (1 - pnorm(abs(t_value)))        # Wald test p-value
+	} else {
+		estimate <- NA
+		p_value <- NA
+	}
+	# Store result
+	results_list[[length(results_list) + 1]] <- data.frame(
+		Symptom = symptom,
+		Predictor = predictor,
+		Estimate = estimate,
+		P_Value = p_value
+	)
 }
 
 # Combine all results into a dataframe
@@ -81,20 +84,21 @@ print(results_df)
 
 
 ### Regression for Age of Onset -------------------------------------------------------------------------------------
-# Filter cases with invalid Ages of Onset
+# Filter cases with invalid ages of onset
 cases <- cases %>%
 	filter(age_onset < 200)
 
-model <- lm(age_onset ~ early_domestic_issues + screener_age, data = cases)
+model <- lm(age_onset ~ predictor + screener_age, data = cases)
 summary(model)
 
 
 
-### Plot Age of Onset ~ Early domestic issues ---------------------------------------------------------------------------------
+### Plot Age of Onset ~ Binary risk factor (e.g. early domestic issues) ---------------------------------------------------------------------------------
+# Filter out cases with missing risk factor
 cases <- cases %>%
-	filter(!is.na(early_domestic_issues))
+	filter(!is.na(predictor))
 
-ggplot(cases, aes(x = age_onset, fill = early_domestic_issues)) +
+ggplot(cases, aes(x = age_onset, fill = predictor)) +
 	geom_density(alpha = 0.5, position = "identity") +
 	labs(
 	    title = "Age of Onset Distribution by Domestic Issues Status",
