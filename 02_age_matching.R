@@ -1,10 +1,19 @@
+#############################################################################################
+### Summary:
+### 1. Manual 2:1 Case-Control matching
+### 2. 1:1 Matching using MatchIt
+#############################################################################################
+
+
 library(dplyr)
 library(survival)
 library(MatchIt)
 
 
-### Manual matching
-## Unusually we have more cases than controls, which makes matching without losing a significant number of cases a challenge. Therefore 2 cases are matched to 1 control here:
+### Manual matching --------------------------------------------------------------------------------------------------------
+## Unusually there are more cases than controls.
+## This makes matching, without losing a significant number of cases, a challenge. 
+## Therefore here 2 cases are matched to 1 control here.
 
 reverse_match_caliper <- function(data, case_var = "subject_type_logical", match_var = "screener_age", k = 2, caliper = 5) {
   # Split dataset into cases and controls
@@ -49,7 +58,7 @@ clogit(subject_type_logical ~ early_loss + strata(pair_id), data = matched_data_
 
 
 
-### Alternative 1:1 matching using MatchIt
+### Alternative 1:1 matching using MatchIt --------------------------------------------------------------------------------------------------------
 #matchit_result <- matchit(
 #  subject_type_logical ~ screener_age,
 #  data = phenotype,
@@ -61,7 +70,7 @@ clogit(subject_type_logical ~ early_loss + strata(pair_id), data = matched_data_
 
 
 
-### Confirm number of exclusions
+### Confirm number of exclusions --------------------------------------------------------------------------------------------------------
 ## Number of excluded cases and controls
 n_original_cases <- sum(phenotype$subject_type_logical == 1)
 n_matched_cases <- sum(matched_data_caliper$role == "case")
