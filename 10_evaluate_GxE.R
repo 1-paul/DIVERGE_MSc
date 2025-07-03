@@ -14,10 +14,10 @@ library(tidyr)
 library(qqman)
 
 # Define which files to use
-file_gxe_results_snps = "/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
-file_gxe_results_all = "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic"
-file_frq_data = "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
-file_pc_results = "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt
+file_gxe_results_snps <- "/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
+file_gxe_results_all <- "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic"
+file_frq_data <- "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
+file_pc_results <- "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt"
 
 
 
