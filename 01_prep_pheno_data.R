@@ -15,17 +15,16 @@ env_data <- read.csv("/SAN/ugi/ukhls/Paul_MS_proj/DIVERGE-PaulBrandesProject_DAT
 ### Exclude all text entries and participants who are neither listed as cases or control, as well as clean up important variables ---------------------------------------------------------------
 
 phenotype <- env_data %>%
-  filter(subject_type != 3) %>% # Filter out tentative control
-  filter(!grepl("est",subject_id)) %>% # Filter out test cases
-  filter(!is.na(screener_age)) %>%
-  mutate(
-    subject_type_logical = ifelse(subject_type == 1, 1, 0),
-    screener_sex = factor(screener_sex, levels = c(1, 2), labels = c("Male", "Female")), 
-    ethnic_self_provincial = factor(ethnic_self_provincial, levels = c(1, 2, 3, 4, 5, 6), labels = c("KPK", "Punjab", "Sindh", "Balochistan", "GilgitBaltistan", "AzadKashmir")),
-    social_support = osss_number_close_people + osss_help_from_others + osss_interest_from_others
-   ) %>%
-	mutate(adversity_score = rowSums(across(c(early_courts_issues, early_forced_leave_home, early_domestic_issues, early_finance_problem, early_physical_assault, early_sexual_assault, early_other_unwanted_sex)), na.rm = TRUE))
-
+	filter(subject_type != 3) %>% # Filter out tentative control
+	filter(!grepl("est",subject_id)) %>% # Filter out test cases
+	filter(!is.na(screener_age)) %>%
+	mutate(
+		subject_type_logical = ifelse(subject_type == 1, 1, 0),
+		screener_sex = factor(screener_sex, levels = c(1, 2), labels = c("Male", "Female")), 
+		ethnic_self_provincial = factor(ethnic_self_provincial, levels = c(1, 2, 3, 4, 5, 6), labels = c("KPK", "Punjab", "Sindh", "Balochistan", "GilgitBaltistan", "AzadKashmir")),
+		social_support = osss_number_close_people + osss_help_from_others + osss_interest_from_others,
+		adversity_score = rowSums(across(c(early_courts_issues, early_forced_leave_home, early_domestic_issues, early_finance_problem, early_physical_assault, early_sexual_assault, early_other_unwanted_sex)), na.rm = TRUE)
+   	)
 
 
 
