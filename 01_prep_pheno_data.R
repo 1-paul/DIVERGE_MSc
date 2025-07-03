@@ -1,10 +1,18 @@
+#############################################################################################
+### Summary:
+### 1. Data cleaning and correct labelling of sex, ethnicity and case/control status
+### 2. Definition of adverse early life experiences (experienced before/including the age of 24)
+#############################################################################################
+
+
 library(dplyr)
 library(tidyr)
 
-
-# Read csv
 env_data <- read.csv("/SAN/ugi/ukhls/Paul_MS_proj/DIVERGE-PaulBrandesProject_DATA_2025-05-28_1315.csv")
 
+
+
+### Exclude all text entries and participants who are neither listed as cases or control, as well as clean up important variables ---------------------------------------------------------------
 
 phenotype <- env_data %>%
   filter(subject_type != 3) %>% # Filter out tentative control
@@ -18,7 +26,9 @@ phenotype <- env_data %>%
    )
 
 
-### Define early life experiences of Stressful Life Events and Other Life Events
+
+### Define early life experiences of Stressful Life Events and Other Life Events ---------------------------------------------------------------
+
 event_vars <- c("te_physical_assault___1", "te_sexual_assault___1", "te_other_unwanted_sex___1", "te_natural_disaster___1", "te_war_zone___1", "le_courts_issues", "le_forced_leave_home", "le_domestic_issues", "le_finance_problem", "le_death_parents")
 age_vars <- c("te_physical_assault_age1", "te_sexual_assault_age1", "te_other_unwanted_sex_age1", "te_natural_disaster_age1", "te_war_zone_age1", "le_courts_issues_age", "le_forced_leave_age", "le_domestic_issues_age", "le_finance_problem_age", "le_death_parents_age")
 
