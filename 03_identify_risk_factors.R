@@ -14,19 +14,29 @@ library(dplyr)
 
 # Define risk factors
 predictors <- c(
-  "early_courts_issues",
-  "early_forced_leave_home",
-  "early_domestic_issues",
-  "early_finance_problem",
-  "le_refugee_status_ever",
-  "early_loss", 
-  "early_physical_assault",
-  "early_sexual_assault",
-  "early_other_unwanted_sex",
-  "early_natural_disaster",
-  "early_war_zone"
+  'early_physical_assault',
+  'early_sexual_assault',
+  'early_other_unwanted_sex',
+  'early_natural_disaster',
+  'early_war_zone',
+  'early_courts_issues',
+  'early_forced_leave_home',
+  'early_domestic_issues',
+  'early_finance_problem',
+  'early_death_parents',
+  'early_conflicts',
+  'early_residence_problems',
+  'early_teenage_pregnant',
+  'early_chronic_illness',
+  'early_parents_separated',
+  'early_death_sibling_friend',
+  'early_hospital_fam_members',
+  'early_captivity',
+  'early_other_serious_accident',
+  'early_transport_accident',
+  'early_bomb',
+  'early_injury_smb_else'
 )
-
 
 
 ### Logistic regression without covariates -----------------------------------------------------------------------------------------------------------------------------------------
