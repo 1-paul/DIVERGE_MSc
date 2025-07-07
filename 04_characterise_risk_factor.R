@@ -6,13 +6,10 @@
 
 library(MASS)
 library(dplyr)
+library(ggplot2)
 
 
-### Define cases and symptoms -----------------------------------------------------------------------------
-
-cases <- phenotype %>%
-  filter(subject_type == 1)
-
+### Define symptoms -----------------------------------------------------------------------------
 symptoms <- c(
   "dip_op37_dysphoria",
   "dip_op39_anhedonia",
@@ -50,9 +47,24 @@ phenotype <- phenotype %>%
 	      )
 
 
+
+### Categories of exposures ----------------------------------------------------------------------------------------
+phenotype <- phenotype %>%
+	mutate(num_of_adversities = case_when(
+		adversity_score == 0 ~ "0",
+    		adversity_score >= 1 & adversity_score <= 2 ~ "1-2",
+    		adversity_score >= 3 ~ "3+")) %>%
+	mutate(num_of_adversities = factor(num_of_adversities, levels = c("0", "1-2", "3+")))
+
+
 # Define risk factor
 #predictor <- "early_domestic_issues"
 predictor <- "adversity_score"
+
+
+
+cases <- phenotype %>%
+  filter(subject_type == 1)
 
 
 ### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
@@ -103,36 +115,46 @@ print(results_df)
 cases <- cases %>%
 	filter(age_onset < 200)
 
-model <- lm(age_onset ~ predictor + screener_age, data = cases)
+formula <- as.formula(paste("age_onset ~", predictor, "+ screener_age"))
+model <- lm(formula, data = cases)
+
 summary(model)
+
 
 
 
 ### Plot Age of Onset ~ Binary risk factor (e.g. early domestic issues) ---------------------------------------------------------------------------------
 # Filter out cases with missing risk factor
 cases <- cases %>%
-	filter(!is.na(predictor))
-
-ggplot(cases, aes(x = age_onset, fill = predictor)) +
-	geom_density(alpha = 0.5, position = "identity") +
-	labs(
-	    title = "Age of Onset Distribution by Domestic Issues Status",
-	    y = "Density (relative distribution)", 
-	    fill = "Early Domestic Issues"
-	) +
-	geom_vline(
-	    data = onset_means, 
-	    aes(xintercept = grp.mean, color = predictor), 
-	    linetype = "dashed", 
-	    linewidth = 1  # Use linewidth, not size
-	) +
-	scale_fill_manual(
-		values = c("No Early Domestic Issues" = "#4dac26", "Early Domestic Issues" = "#d01c8b")
-	) +
-	scale_color_manual(
-		values = c("No Early Domestic Issues" = "#4dac26", "Early Domestic Issues" = "#d01c8b")
-	) +
-	theme_minimal()
+	filter(!is.na(num_of_adversities))
 
 
+onset_means <- cases %>%
+	group_by(num_of_adversities) %>% 
+	summarize(grp.mean = mean(age_onset, na.rm = TRUE))
+
+
+ggplot(cases, aes(x = age_onset, fill = factor(num_of_adversities))) +
+  geom_density(alpha = 0.5, position = "identity") +
+  labs(
+    title = "Age of onset distribution by number of experienced early adversities",
+    x = "Age of Onset",
+    y = "Percentage of Total Cases", 
+    fill = "Number of Adversities"
+  ) +
+  geom_vline(
+    data = onset_means, 
+    aes(xintercept = grp.mean, color = factor(num_of_adversities)), 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  scale_fill_manual(
+    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
+    labels = c("0", "1-2", "3+")
+  ) +
+  scale_color_manual(
+    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
+    labels = c("0", "1-2", "3+")
+  ) +
+  theme_bw()
 
