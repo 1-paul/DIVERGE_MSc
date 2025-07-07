@@ -13,6 +13,7 @@ library(dplyr)
 
 
 # Define risk factors
+## early_chronic_illness removed due to low sample size
 predictors <- c(
   'early_physical_assault',
   'early_sexual_assault',
@@ -27,7 +28,6 @@ predictors <- c(
   'early_conflicts',
   'early_residence_problems',
   'early_teenage_pregnant',
-  'early_chronic_illness',
   'early_parents_separated',
   'early_death_sibling_friend',
   'early_hospital_fam_members',
