@@ -35,9 +35,24 @@ symptoms <- c(
   "sbq_suicide_told_smb"
 )
 
-# Define risk factor
-predictor <- "early_domestic_issues"
 
+### Adversity score with found consistent risk factors in 03_identify_risk_factors.R
+phenotype <- phenotype %>%
+	mutate(adversity_score = rowSums(across(c(
+		early_courts_issues, 
+		early_conflicts, 
+		early_domestic_issues, 
+		early_finance_problem, 
+		early_physical_assault, 
+		early_sexual_assault, 
+		early_other_unwanted_sex,
+		early_parents_separated)), na.rm = TRUE)
+	      )
+
+
+# Define risk factor
+#predictor <- "early_domestic_issues"
+predictor <- "adversity_score"
 
 
 ### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
@@ -107,7 +122,7 @@ ggplot(cases, aes(x = age_onset, fill = predictor)) +
 	) +
 	geom_vline(
 	    data = onset_means, 
-	    aes(xintercept = grp.mean, color = early_domestic_issues), 
+	    aes(xintercept = grp.mean, color = predictor), 
 	    linetype = "dashed", 
 	    linewidth = 1  # Use linewidth, not size
 	) +
