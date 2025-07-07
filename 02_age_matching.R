@@ -54,9 +54,6 @@ case_control_match <- function(data, case_var = "subject_type_logical", match_va
 # Run matching
 matched_data_caliper <- case_control_match(phenotype, ratio = 2, caliper = 5)
 
-# Run conditional logistic regression
-clogit(subject_type_logical ~ early_loss + strata(pair_id), data = matched_data_caliper)
-
 
 
 ### Alternative 1:1 matching using MatchIt --------------------------------------------------------------------------------------------------------
