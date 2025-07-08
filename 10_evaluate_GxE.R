@@ -2,8 +2,7 @@
 ### Summary:
 ### 1. Format all the GxE result files correctly
 ### 2. Get the common SNPs with p-values above suggestive signficance
-### 3. Manhattan and QQ plot
-### 4. Evaluation of PCs and PC null model 
+### 3. Plot p-Value of SNP vs beta of the interaction
 #############################################################################################
 
 
@@ -14,17 +13,17 @@ library(tidyr)
 library(qqman)
 
 # Define which files to use
-file_gxe_results_snps <- "/home/pbrandes/20250624_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
-file_gxe_results_all <- "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results.PHENO1.glm.logistic"
+file_gxe_results_snps <- "/home/pbrandes/20250701_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
+file_gxe_results_all <- "/cluster/project2/DIVERGE/20250701_GxE/00_gwas_results.PHENO1.glm.logistic"
 file_frq_data <- "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
-file_pc_results <- "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt"
+file_pc_results <- "/cluster/project2/DIVERGE/20250701_GxE/covariates.txt"
 
 
 
 ### Correctly format GxE results -----------------------------------------------------------------------------
 gxe_results_snps <- read.table(file_gxe_results_snps, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
+colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "LOG_OR", "LOG_OR_SE", "Z_STAT", "P")
 
 gxe_results_snps <- gxe_results_snps %>% 
 	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
@@ -45,7 +44,9 @@ common_variants <- frq_data %>%
 gxe_results_snps <- gxe_results_snps %>%
 	filter(ID %in% common_variants$SNP)
 
-# Get significant SNPs with TEST == "ADD" and P < 0.00001
+
+
+#### Get significant SNPs with TEST == "ADD" and P < 0.00001 --------------------------------------------------
 significant_snps <- gxe_results_snps %>%
 	filter(TEST == "ADD", P < 0.00001) %>%
 	pull(ID)  # Extract SNP IDs
@@ -56,90 +57,52 @@ significant_results <- gxe_results_snps %>%
 
 
 
-### Manhattan & QQ plot using qqman package ---------------------------------------------------------
-
-# png("manhattan_plot.png", width=1200, height=600) 
-manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#d01c8b", "#980043"), ymax = 10)
-# dev.off()
-
-qq(gwas_results_snps$P, main = "Q-Q plot of GWAS p-values")
-
-
-### Manhattan plot using ggplot
-
-don <- gwas_results_snps %>% 
-	group_by(CHROM) %>% # Compute chromosome size
-	summarise(chrlen=max(POS)) %>%
-	mutate(tot=cumsum(chrlen) - chrlen) %>% # Calculate cumulative position of each chromosome
-	dplyr::select(-chrlen) %>%
-	left_join(gwas_results_snps, ., by=c("CHROM"="CHROM")) %>% # Add this info to the initial dataset
-	arrange(CHROM, POS) %>% # Add a cumulative position of each SNP
-	mutate(BPcum=POS+tot)
-
-axisdf = don %>%
-	group_by(CHROM) %>%
-	summarize(center=(max(BPcum) + min(BPcum) ) / 2 )
-
-ggplot(don, aes(x=BPcum, y=-log10(P))) +
-    
-    # Show all points
-    geom_point( aes(color=as.factor(CHROM)), alpha=0.8, size=1.3) +
-    scale_color_manual(values = rep(c("#4dac26", "#d01c8b"), 22 )) +
-    
-    # custom X axis:
-    scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center ) +
-    scale_y_continuous(expand = c(0, 0) ) +     # remove space between plot area and x axis
-  
-    # Custom the theme:
-    theme_bw() +
-    theme( 
-      legend.position="none",
-      panel.border = element_blank(),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor.x = element_blank()
-    )
-
-
-
-### Evaluate PCs ---------------------------------------------------------
-## Summarise Mean, Median, Max, Min
-gwas_results_all <- read.table(file_gxe_results_all)
-
-colnames(gwas_results_all) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
-
-gwas_results_all$CHROM <- as.numeric(gwas_results_all$CHROM)
-
-gwas_results_all <- gwas_results_all %>% 
-	filter(!is.na(CHROM))
-
-gwas_results_all <- gwas_results_all %>%
-	filter(
-		!is.na(P),          # Remove NA
-	    P > 0,              # Remove negative/zero
-	    !is.infinite(P)     # Remove infinite
-	) %>%
+### Widen to one column per SNP ---------------------------------------------------------------------------------------------------------
+wider_df <- gxe_results_snps %>%
+	# Will have to adapt names here, when changing risk factors
 	mutate(
-		P = if_else(P > 1, 1, P)  # Cap at 1 if any P > 1 exists
-	)
+		suffix = case_when(
+      		TEST == "ADD" ~ "_snp",
+      		TEST == "adversity_score" ~ "_env",
+      		TEST == "ADDxadversity_score" ~ "_gxe"
+    		)
+	) %>%
+ 	pivot_wider(
+    		id_cols = c(CHROM, POS, ID, REF, ALT, A1, OBS_CT),
+    		names_from = suffix,
+    		values_from = c(LOG_OR, LOG_OR_SE, Z_STAT, P),
+    		names_glue = "{.value}{suffix}"
+	) %>%
+  	mutate(log10_P_snp = log10(P_snp))
 
-gwas_results_all %>% 
-	group_by(TEST) %>% 
-	summarize(
-		mean = mean(P),
-	    median = median(P),
-		maximum = max(P),
-		minimum = min(P)
-	)
 
 
+### plot beta of p-value vs beta of the interactions ---------------------------------------------------------------------------------------------------------
 
-### Null model with PCs ---------------------------------------------------------
-## Load PCs
-pc_results <- read.table(file_pc_results")
-colnames(pc_results) <- c("FID", "IID", "SEX", "PHENO1", "FID2", "IID2", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8")
-
-## Match them with phenotypic data
-combined_df <- merge(phenotype, pc_results, by.x = "subject_id", , by.y = "IID")
-
-## Run the null model
-model <- glm(subject_type_logical ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8, data = combined_df, family = binomial)
+# png("0807_beta_vs_p_1.png", width=1200, height=1200)
+ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_snp)) +
+	geom_point(alpha = 0.7, size = 1.2) +
+  
+ 	# Reference lines
+	geom_vline(xintercept = 1, linetype = "dashed", color = "red", linewidth = 0.5) +
+	#geom_vline(xintercept = 0.05, linetype = "dashed", color = "red", linewidth = 0.5) + # needs to be change so there is up to 3x the sd
+ 	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +  # y = -4
+  
+	# Custom y-axis (reverse breaks to put p=1 at the bottom)
+	scale_y_reverse(
+		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7)),  # Breaks at log10(p)
+		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7")  # Label with raw p-values
+	) +
+  
+	# Axis labels
+	labs(
+		x = "Log Odds Ratio (GxE Interaction)",
+		y = "P-value (log10 scale)",
+		title = "GxE Interaction vs. SNP Main Effects"
+	) +
+  
+	theme_bw() +
+	theme(
+		panel.grid.minor = element_blank(),
+		plot.title = element_text(hjust = 0.5)
+  	)
