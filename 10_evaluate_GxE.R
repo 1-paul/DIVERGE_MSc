@@ -13,6 +13,7 @@ library(tidyr)
 library(qqman)
 
 # Define which files to use
+## Just change if script is to be adapted for different risk factor
 file_gxe_results_snps <- "/home/pbrandes/20250701_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
 file_gxe_results_all <- "/cluster/project2/DIVERGE/20250701_GxE/00_gwas_results.PHENO1.glm.logistic"
 file_frq_data <- "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
@@ -58,8 +59,8 @@ significant_results <- gxe_results_snps %>%
 
 
 ### Widen to one column per SNP ---------------------------------------------------------------------------------------------------------
+# Will have to adapt names here, when changing risk factors!
 wider_df <- gxe_results_snps %>%
-	# Will have to adapt names here, when changing risk factors
 	mutate(
 		suffix = case_when(
       		TEST == "ADD" ~ "_snp",
@@ -89,7 +90,6 @@ ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_snp)) +
   
  	# Reference lines
 	geom_vline(xintercept = 0, linetype = "dashed", color = "red", linewidth = 0.5) +
-	#geom_vline(xintercept = 0.05, linetype = "dashed", color = "red", linewidth = 0.5) + # needs to be change so there is up to 3x the sd
  	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
   
