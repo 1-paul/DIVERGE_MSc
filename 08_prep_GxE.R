@@ -2,7 +2,7 @@ library(dplyr)
 
 
 # Filter phenotype
-early_domestic_issues_df <- phenotype %>%
+risk_factor_df <- phenotype %>%
     select(subject_id, early_domestic_issues, adversity_score)
 
 
@@ -15,8 +15,8 @@ covariates <- read.table(
 )
 
 
-# Merge by ID, just adding early_domestic_issues
-combined_df <- merge(covariates, early_domestic_issues_df, by.x = "IID", by.y = "subject_id")
+# Merge by ID, just adding risk_factor_df
+combined_df <- merge(covariates, risk_factor_df, by.x = "IID", by.y = "subject_id")
 
 
 # Load freeze2 IDs file
