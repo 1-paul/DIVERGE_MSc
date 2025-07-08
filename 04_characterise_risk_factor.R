@@ -158,3 +158,45 @@ ggplot(cases, aes(x = age_onset, fill = factor(num_of_adversities))) +
   ) +
   theme_bw()
 
+### Boxplot --------------------------------------------------------------------------------------------------------
+# First, create the 6 categories
+phenotype <- phenotype %>%
+  mutate(num_of_adversities = case_when(
+    adversity_score == 0 ~ "0",
+    adversity_score == 1 ~ "1",
+    adversity_score == 2 ~ "2",
+    adversity_score == 3 ~ "3",
+    adversity_score == 4 ~ "4",
+    adversity_score >= 5 ~ "5+"
+  )) %>%
+  mutate(num_of_adversities = factor(num_of_adversities, 
+                                    levels = c("0", "1", "2", "3", "4", "5+")))
+
+cases <- phenotype %>%
+  filter(subject_type == 1)
+
+# Filter out NA values
+cases <- cases %>%
+	filter(!is.na(num_of_adversities)) %>%
+	filter(age_onset < 200)
+
+# Create a facetted boxplot
+ggplot(cases, aes(x = num_of_adversities, y = age_onset, fill = num_of_adversities)) +
+	geom_boxplot() +
+	labs(
+    		title = "Age of onset by Number of experienced Early Aversities",
+    		x = "Number of Adversities",
+    		y = "Age of Onset"
+  	) +
+  	scale_fill_manual(
+	    values = c("0" = "#ffffb2", 
+	               "1" = "#fed976", 
+	               "2" = "#feb24c", 
+	               "3" = "#fd8d3c", 
+	               "4" = "#f03b20", 
+	               "5+" = "#bd0026"),
+	    name = "Number of Adversities"
+  	) +
+	theme_bw() +
+	theme(legend.position = "none") +  # Remove legend since x-axis shows the categories
+	stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "black")  # Add mean markers
