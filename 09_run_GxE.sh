@@ -23,4 +23,4 @@
 
 
 ### Filter for the main effects and interaction
-# awk '$7 == "ADD" || $7 == "early_domestic_issues" || $7 == "ADDxearly_domestic_issues"' gxe_results.PHENO1.glm.logistic > gxe_results_snp_edi_snpxedi_results_only.txt
+# awk '$7 == "ADD" || $7 == "adversity_score" || $7 == "ADDxadversity_score"' gxe_results.PHENO1.glm.logistic > gxe_results_snp_edi_snpxedi_results_only.txt
