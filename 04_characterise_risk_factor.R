@@ -36,25 +36,14 @@ symptoms <- c(
 ### Adversity score with found consistent risk factors in 03_identify_risk_factors.R
 phenotype <- phenotype %>%
 	mutate(adversity_score = rowSums(across(c(
-		early_courts_issues, 
-		early_conflicts, 
-		early_domestic_issues, 
-		early_finance_problem, 
 		early_physical_assault, 
-		early_sexual_assault, 
-		early_other_unwanted_sex,
-		early_parents_separated)), na.rm = TRUE)
+		early_sexual_assault2,
+		early_courts_issues,
+		early_domestic_issues,
+		early_finance_problem, 
+		early_conflicts)), na.rm = TRUE)
 	      )
 
-
-
-### Categories of exposures ----------------------------------------------------------------------------------------
-phenotype <- phenotype %>%
-	mutate(num_of_adversities = case_when(
-		adversity_score == 0 ~ "0",
-    		adversity_score >= 1 & adversity_score <= 2 ~ "1-2",
-    		adversity_score >= 3 ~ "3+")) %>%
-	mutate(num_of_adversities = factor(num_of_adversities, levels = c("0", "1-2", "3+")))
 
 
 # Define risk factor
@@ -122,42 +111,6 @@ summary(model)
 
 
 
-
-### Plot Age of Onset ~ Binary risk factor (e.g. early domestic issues) ---------------------------------------------------------------------------------
-# Filter out cases with missing risk factor
-cases <- cases %>%
-	filter(!is.na(num_of_adversities))
-
-
-onset_means <- cases %>%
-	group_by(num_of_adversities) %>% 
-	summarize(grp.mean = mean(age_onset, na.rm = TRUE))
-
-
-ggplot(cases, aes(x = age_onset, fill = factor(num_of_adversities))) +
-  geom_density(alpha = 0.5, position = "identity") +
-  labs(
-    title = "Age of onset distribution by number of experienced early adversities",
-    x = "Age of Onset",
-    y = "Percentage of Total Cases", 
-    fill = "Number of Adversities"
-  ) +
-  geom_vline(
-    data = onset_means, 
-    aes(xintercept = grp.mean, color = factor(num_of_adversities)), 
-    linetype = "dashed", 
-    linewidth = 1
-  ) +
-  scale_fill_manual(
-    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
-    labels = c("0", "1-2", "3+")
-  ) +
-  scale_color_manual(
-    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
-    labels = c("0", "1-2", "3+")
-  ) +
-  theme_bw()
-
 ### Boxplot --------------------------------------------------------------------------------------------------------
 # First, create the 6 categories
 phenotype <- phenotype %>%
@@ -200,3 +153,51 @@ ggplot(cases, aes(x = num_of_adversities, y = age_onset, fill = num_of_adversiti
 	theme_bw() +
 	theme(legend.position = "none") +  # Remove legend since x-axis shows the categories
 	stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "black")  # Add mean markers
+
+
+
+### Plot Age of Onset ~ Risk Factor(e.g. early domestic issues) ---------------------------------------------------------------------------------
+
+## First define categories of exposure:
+phenotype <- phenotype %>%
+	mutate(num_of_adversities = case_when(
+		adversity_score == 0 ~ "0",
+    		adversity_score >= 1 & adversity_score <= 2 ~ "1-2",
+    		adversity_score >= 3 ~ "3+")) %>%
+	mutate(num_of_adversities = factor(num_of_adversities, levels = c("0", "1-2", "3+")))
+
+
+# Filter out cases with missing risk factor
+cases <- cases %>%
+	filter(!is.na(num_of_adversities))
+
+
+onset_means <- cases %>%
+	group_by(num_of_adversities) %>% 
+	summarize(grp.mean = mean(age_onset, na.rm = TRUE))
+
+## Then plot:
+ggplot(cases, aes(x = age_onset, fill = factor(num_of_adversities))) +
+  geom_density(alpha = 0.5, position = "identity") +
+  labs(
+    title = "Age of onset distribution by number of experienced early adversities",
+    x = "Age of Onset",
+    y = "Percentage of Total Cases", 
+    fill = "Number of Adversities"
+  ) +
+  geom_vline(
+    data = onset_means, 
+    aes(xintercept = grp.mean, color = factor(num_of_adversities)), 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  scale_fill_manual(
+    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
+    labels = c("0", "1-2", "3+")
+  ) +
+  scale_color_manual(
+    values = c("0" = "#ffeda0", "1-2" = "#feb24c", "3+" = "#f03b20"),
+    labels = c("0", "1-2", "3+")
+  ) +
+  theme_bw()
+
