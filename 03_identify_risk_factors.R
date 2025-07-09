@@ -110,8 +110,8 @@ names(pvals) <- names(estimates) <- predictors
 
 # Run conditional logistic regressions and extract p-values and estimates
 for (i in seq_along(predictors)) {
-  formula <- as.formula(paste("subject_type_logical ~", predictors[i], "+ strata(pair_id)"))
-  model <- clogit(formula, data = matched_data_caliper)
+  formula <- as.formula(paste("subject_type_logical ~", predictors[i], "+ strata(subclass)"))
+  model <- clogit(formula, data = matched_data)
   smry <- summary(model)
   
   # Extract p-value
