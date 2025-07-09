@@ -13,11 +13,15 @@ library(dplyr)
 
 
 # Define risk factors
-## early_chronic_illness removed due to low sample size
+## Combined early_sexual_assault & early_other_unwanted_sex
+phenotype <- phenotype %>%
+  # New variable counts both early_sexual_assault & early_other_unwanted_sex as sexual assault
+  mutate(early_sexual_assault2 = as.numeric(early_sexual_assault | early_other_unwanted_sex))
+
+
 predictors <- c(
   'early_physical_assault',
-  'early_sexual_assault',
-  'early_other_unwanted_sex',
+  'early_sexual_assault2',
   'early_natural_disaster',
   'early_war_zone',
   'early_courts_issues',
