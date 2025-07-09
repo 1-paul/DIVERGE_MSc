@@ -42,7 +42,6 @@ event_vars <- c("te_physical_assault___1",
 		"le_conflicts",
 		"le_residence_problems",
 		"le_teenage_pregnant",
-		"le_chronic_illeness",
 		"le_parents_separated",
 		"le_death_sibling_friend",
 		"le_hospital_fam_members",
@@ -65,7 +64,6 @@ age_vars <- c("te_physical_assault_age1",
 	      "le_conflicts_age",
 	      "le_residence_problems_age",
 	      "le_teenage_pregnant_age",
-	      "le_chronic_illness_age",
 	      "le_parents_separated_age",
 	      "le_death_sibling_friend_age",
 	      "le_hospit_fam_members_age",
@@ -76,6 +74,7 @@ age_vars <- c("te_physical_assault_age1",
 	      "te_injury_smb_else_age1"
 	     )
 
+# le_chronic_illness removed due to bias during case/control selection
 
 for (i in seq_along(event_vars)) {
   event <- event_vars[i]
