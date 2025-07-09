@@ -94,3 +94,10 @@ for (i in seq_along(event_vars)) {
 }
 
 
+
+### Combined early_sexual_assault & early_other_unwanted_sex ----------------------------------------------------------------------------------------
+phenotype <- phenotype %>%
+  # New variable counts both early_sexual_assault & early_other_unwanted_sex as sexual assault
+  mutate(early_sexual_assault2 = as.numeric(early_sexual_assault | early_other_unwanted_sex))
+
+
