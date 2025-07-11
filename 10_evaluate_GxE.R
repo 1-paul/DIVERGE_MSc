@@ -37,6 +37,7 @@ gxe_results_snps <- gxe_results_snps %>%
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
 frq_data <- read.table(file_frq_data, header = TRUE, stringsAsFactors = FALSE)
+### CHANGE FILE
 
 # Filter out rare variants 
 common_variants <- frq_data %>% 
@@ -44,17 +45,6 @@ common_variants <- frq_data %>%
 	
 gxe_results_snps <- gxe_results_snps %>%
 	filter(ID %in% common_variants$SNP)
-
-
-
-#### Get significant SNPs with TEST == "ADD" and P < 0.00001 --------------------------------------------------
-significant_snps <- gxe_results_snps %>%
-	filter(TEST == "ADD", P < 0.00001) %>%
-	pull(ID)  # Extract SNP IDs
-
-# Filter all rows (ADD, risk factor (e.g. early domestic issues), ADD x risk factor) for those SNPs
-significant_results <- gxe_results_snps %>%
-	filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
 
 
 
@@ -80,6 +70,22 @@ wider_df <- gxe_results_snps %>%
 		significant_gxe = if_else(P_gxe <= 0.05, "1", "0")
 	)
 
+
+
+#### Get significant SNPs ---------------------------------------------------------------------------------------------------------
+significant_snps <- wider_df %>%
+	filter(P_snp < 0.00001) %>%
+	pull(ID)  # Extract SNP IDs
+
+
+# Filter all rows (ADD, risk factor (e.g. early domestic issues), ADD x risk factor) for those SNPs
+significant_results <- wider_df %>%
+	filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
+	arrange(P_snp)
+
+
+
+### Get signific
 
 
 ### plot beta of p-value vs beta of the interactions ---------------------------------------------------------------------------------------------------------
