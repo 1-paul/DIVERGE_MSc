@@ -16,7 +16,7 @@ library(qqman)
 ## Just change if script is to be adapted for different risk factor
 file_gxe_results_snps <- "/home/pbrandes/20250701_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
 file_gxe_results_all <- "/cluster/project2/DIVERGE/20250701_GxE/00_gwas_results.PHENO1.glm.logistic"
-file_frq_data <- "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq"
+file_frq_data <- "/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/08_hardy_final.frq"
 file_pc_results <- "/cluster/project2/DIVERGE/20250701_GxE/covariates.txt"
 
 
@@ -37,7 +37,6 @@ gxe_results_snps <- gxe_results_snps %>%
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
 frq_data <- read.table(file_frq_data, header = TRUE, stringsAsFactors = FALSE)
-### CHANGE FILE
 
 # Filter out rare variants 
 common_variants <- frq_data %>% 
@@ -67,7 +66,11 @@ wider_df <- gxe_results_snps %>%
   	mutate(
 		log10_P_snp = log10(P_snp),
 		LOG_OR_gxe = log(OR_gxe),
-		significant_gxe = if_else(P_gxe <= 0.05, "1", "0")
+		significant_gxe = if_else(P_gxe <= 0.05, "1", "0"),
+		significant_gxe = factor(significant_gxe, levels = c(0, 1)),
+		highly_sign_gxe = if_else(P_gxe <= 1e-5, "1", "0"),
+		highly_sign_gxe = factor(highly_sign_gxe, levels = c(0, 1))
+
 	)
 
 
@@ -78,49 +81,61 @@ significant_snps <- wider_df %>%
 	pull(ID)  # Extract SNP IDs
 
 
-# Filter all rows (ADD, risk factor (e.g. early domestic issues), ADD x risk factor) for those SNPs
+# Get top hits (addiditve effect)
 significant_results <- wider_df %>%
-	filter(ID %in% significant_snps)  # Keeps all TEST types for those SNPs
+	filter(ID %in% significant_snps) %>%  # Keeps all TEST types for those SNPs
 	arrange(P_snp)
 
 
+### Get significant interaction
+significant_interaction <- wider_df %>%
+	arrange(P_gxe) %>%
+	head(20)
 
-### Get signific
 
 
 ### plot beta of p-value vs beta of the interactions ---------------------------------------------------------------------------------------------------------
 
-# png("0807_beta_vs_p_1.png", width=1200, height=1200)
+# png("1107_beta_vs_p_1.png", width=1000, height=800)
 ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_snp)) +
-	geom_point(aes(color = significant_gxe), alpha = 0.7, size = 1.2) +
+	# Switc between significant_gxe and highly_sign_gxe
+	geom_point(aes(color = significant_gxe, size = significant_gxe), alpha = 0.7) +
   
- 	# Reference lines
+	# Reference lines
 	geom_vline(xintercept = 0, linetype = "dashed", color = "red", linewidth = 0.5) +
- 	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
+	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
-  
-	# Custom y-axis (reverse breaks to put p=1 at the bottom)
+	
+	# Scales
 	scale_y_reverse(
-		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7)),  # Breaks at log10(p)
-		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7")  # Label with raw p-values
+		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)),
+		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8")
 	) +
 	scale_color_manual(
-		values = c("1" = "#f03b20", "0" = "#252525"), 
-	    	name = "GxE Significance",
-		labels = c("1" = "Significant Interaction", "0" = "No Significant Interaction")
+		values = c("1" = "#08519c", "0" = "#969696"),
+		name = "GxE Significance",
+		labels = c("1" = "Significant Interaction (<= 0.05)", "0" = "No Significant Interaction")
 	) +
-	  
-	# Axis labels
+	scale_size_manual(
+		values = c("1" = 1.6, "0" = 0.8),  
+		guide = "none"  # Hide size legend since redundant with color
+	) +
+	
+	# Labels
 	labs(
 		x = "Log Odds Ratio (GxE Interaction)",
 		y = "P-value (log10 scale)",
-		title = "GxE Interaction vs. SNP Main Effects"
+		title = "P-value of SNP main effect vs. Odds of Interaction"
 	) +
-  
+	
+	# Theme
 	theme_bw() +
 	theme(
 		panel.grid.minor = element_blank(),
-		plot.title = element_text(hjust = 0.5)
-  	)
-
+		plot.title = element_text(hjust = 0.5, size = 20),
+		axis.title = element_text(size = 18),
+		axis.text = element_text(size = 16),
+		legend.title = element_text(size = 18),
+		legend.text = element_text(size = 16)
+	)
 
