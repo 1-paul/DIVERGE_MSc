@@ -7,6 +7,7 @@
 library(MASS)
 library(dplyr)
 library(ggplot2)
+library(patchwork)
 
 
 ### Define symptoms -----------------------------------------------------------------------------
@@ -33,7 +34,7 @@ symptoms <- c(
 )
 
 
-### Adversity score with found consistent risk factors in 03_identify_risk_factors.R
+### Adversity score with found consistent risk factors in 03_identify_risk_factors.R -----------------------------------------------------------------------------------------------
 phenotype <- phenotype %>%
 	mutate(adversity_score = rowSums(across(c(
 		early_physical_assault, 
@@ -45,15 +46,51 @@ phenotype <- phenotype %>%
 	      )
 
 
-
 # Define risk factor
 #predictor <- "early_domestic_issues"
 predictor <- "adversity_score"
 
 
-
 cases <- phenotype %>%
   filter(subject_type == 1)
+
+
+
+### Plot adversity score (NEEDS TO BE REWORKED) -----------------------------------------------------------------------------------------------
+plot_data <- phenotype %>%
+	mutate(Status = factor(subject_type_logical, levels = c(0, 1), labels = c("Control", "Case"))) %>%
+  	count(Status, adversity_score) %>%
+  	group_by(Status) %>%
+  	mutate(prop = n / sum(n))
+
+
+# Create the two plot segments
+p1 <- ggplot(plot_data, aes(x = adversity_score, y = prop, fill = Status)) +
+  geom_col(position = position_dodge(width = 0.9), width = 0.8, alpha = 0.7) +
+  scale_fill_manual(values = c("Control" = "#008837", "Case" = "#7b3294")) +
+  scale_x_continuous(breaks = 0:6) +
+  coord_cartesian(ylim = c(0.8, 1)) +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+	legend.position = "none")
+
+p2 <- ggplot(plot_data, aes(x = adversity_score, y = prop, fill = Status)) +
+  geom_col(position = position_dodge(width = 0.9), width = 0.8, alpha = 0.7) +
+  scale_fill_manual(values = c("Control" = "#008837", "Case" = "#7b3294")) +
+  scale_x_continuous(breaks = 0:6) +
+  coord_cartesian(ylim = c(0, 0.15)) +
+  theme_bw()
+
+# Combine with patchwork (more reliable than gtable)
+combined <- p1 / p2 + 
+  plot_layout(heights = c(1, 1),  # Equal heights
+              guides = "collect") &  # Collect legends (only from p2)
+  theme(plot.margin = margin(t = 2, r = 5.5, b = 2, l = 5.5, unit = "pt"))  # Smaller margins
+
+print(combined)
+
 
 
 ### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
