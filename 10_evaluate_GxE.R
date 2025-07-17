@@ -193,8 +193,10 @@ ggplot(wider_df, aes(x = log10_P_gxe, y = log10_P_snp)) +
 	geom_point(, alpha = 0.7) +
   
 	# Reference lines
+	geom_vline(xintercept = log10(0.05), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_vline(xintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_vline(xintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
+	geom_vline(yintercept = log10(0.05), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	
@@ -206,25 +208,12 @@ ggplot(wider_df, aes(x = log10_P_gxe, y = log10_P_snp)) +
 	scale_x_reverse(
 			breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)),
 			labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8")
-	)
-	scale_color_manual(
-		values = c("1" = "#08519c", "0" = "#969696"),
-		name = "GxE Significance",
-		labels = c("1" = "Significant Interaction (<= 0.05)", "0" = "No Significant Interaction")
 	) +
-	scale_size_manual(
-		values = c("1" = 1.6, "0" = 0.8),  
-		guide = "none"  # Hide size legend since redundant with color
-	) +
-	
-	# Labels
 	labs(
-		x = "Log Odds Ratio (GxE Interaction)",
-		y = "P-value (log10 scale)",
-		title = "P-value of SNP main effect vs. Odds of Interaction"
+		x = "P-value of the GxE interaction",
+		y = "P-value of the SNP main effect",
+		title = "P-value of SNP main effect vs. P-value of the GxE interaction"
 	) +
-	
-	# Theme
 	theme_bw() +
 	theme(
 		panel.grid.minor = element_blank(),
