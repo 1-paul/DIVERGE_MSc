@@ -61,33 +61,73 @@ plot_data <- phenotype %>%
 	mutate(Status = factor(subject_type_logical, levels = c(0, 1), labels = c("Control", "Case"))) %>%
   	count(Status, adversity_score) %>%
   	group_by(Status) %>%
-  	mutate(prop = n / sum(n))
+  	mutate(prop = n / sum(n)) %>%
+	ungroup() %>%  # Ungroup just in case it's grouped
+	mutate(Status = factor(Status, levels = c("Control", "Case"))) %>%
+	complete(adversity_score, Status, fill = list(prop = 0))
 
 
-# Create the two plot segments
+# p1: Top plot
 p1 <- ggplot(plot_data, aes(x = adversity_score, y = prop, fill = Status)) +
   geom_col(position = position_dodge(width = 0.9), width = 0.8, alpha = 0.7) +
   scale_fill_manual(values = c("Control" = "#008837", "Case" = "#7b3294")) +
-  scale_x_continuous(breaks = 0:6) +
+  scale_x_continuous(breaks = 0:6, expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
   coord_cartesian(ylim = c(0.8, 1)) +
-  theme_bw() +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-	legend.position = "none")
+  theme_bw(base_family = "CMU Serif") +
+  labs(title = "Proportion per Adversity Score", x = NULL, y = NULL, fill = NULL) +
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.text = element_text(size = 14),
+    legend.position = c(0.98, 0.98),
+    legend.justification = c("right", "top"),
+    legend.background = element_rect(fill = alpha("white", 0.7), color = NA),
+    panel.border = element_blank(),
+    axis.line = element_line(color = "black", linewidth = 0.7)
+  )
 
+# p2: Bottom plot
 p2 <- ggplot(plot_data, aes(x = adversity_score, y = prop, fill = Status)) +
   geom_col(position = position_dodge(width = 0.9), width = 0.8, alpha = 0.7) +
+  geom_hline(yintercept = 0.2, linewidth = 1.4, color = "black") +
   scale_fill_manual(values = c("Control" = "#008837", "Case" = "#7b3294")) +
-  scale_x_continuous(breaks = 0:6) +
-  coord_cartesian(ylim = c(0, 0.15)) +
-  theme_bw()
+  scale_x_continuous(breaks = 0:6, expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  coord_cartesian(ylim = c(0, 0.2)) +
+  labs(x = "Adversity Score", y = NULL) +
+  theme_bw(base_family = "CMU Serif") +
+  theme(
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14),
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.line = element_blank(),
+    axis.line.x.bottom = element_line(color = "black", linewidth = 0.7),
+    axis.line.y.left = element_line(color = "black", linewidth = 0.7),
+    axis.line.x.top = element_line(color = "black", linewidth = 0.7)
+  )
 
-# Combine with patchwork (more reliable than gtable)
-combined <- p1 / p2 + 
-  plot_layout(heights = c(1, 1),  # Equal heights
-              guides = "collect") &  # Collect legends (only from p2)
-  theme(plot.margin = margin(t = 2, r = 5.5, b = 2, l = 5.5, unit = "pt"))  # Smaller margins
+# Shared y-axis label
+y_axis <- ggplot() +
+  theme_void() +
+  annotate(
+    "text",
+    x = 0.9, y = 0.5,
+    label = "Proportion of Total Participants with Adversity Score",
+    angle = 90, size = 5,
+    fontface = "bold", family = "CMU Serif"
+  )
+
+# Combine using patchwork
+combined <- (y_axis + plot_spacer() + (p1 / p2 + plot_layout(heights = c(1, 1.05)))) +
+  plot_layout(ncol = 3, widths = c(0.05, 0.01, 1)) &
+  theme(plot.margin = margin(t = 4, r = 8, b = 4, l = 8, unit = "pt"))
 
 print(combined)
 
