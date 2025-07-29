@@ -210,26 +210,33 @@ cases <- cases %>%
 	filter(!is.na(num_of_adversities)) %>%
 	filter(age_onset < 200)
 
-# Create a facetted boxplot
+
 ggplot(cases, aes(x = num_of_adversities, y = age_onset, fill = num_of_adversities)) +
-	geom_boxplot() +
-	labs(
-    		title = "Age of onset by Number of experienced Early Aversities",
-    		x = "Number of Adversities",
-    		y = "Age of Onset"
-  	) +
-  	scale_fill_manual(
-	    values = c("0" = "#ffffb2", 
-	               "1" = "#fed976", 
-	               "2" = "#feb24c", 
-	               "3" = "#fd8d3c", 
-	               "4" = "#f03b20", 
-	               "5+" = "#bd0026"),
-	    name = "Number of Adversities"
-  	) +
-	theme_bw() +
-	theme(legend.position = "none") +  # Remove legend since x-axis shows the categories
-	stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "black")  # Add mean markers
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c("0" = "#ffffb2", 
+               "1" = "#fed976", 
+               "2" = "#feb24c", 
+               "3" = "#fd8d3c", 
+               "4" = "#f03b20", 
+               "5+" = "#bd0026"),
+    name = "Number of Adversities"
+  ) +
+  labs(
+    x = "Number of Adversities",
+    y = "Age of Onset"
+  ) +
+  theme_bw(base_family = "CMU Serif") +
+  theme(
+    plot.title = element_blank(),  # Remove title
+    legend.position = "none",      # Remove legend
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    panel.border = element_blank(),                         # Remove full panel border
+    axis.line = element_line(color = "black", linewidth = 0.8), # Show left and bottom axis lines
+    axis.line.y.right = element_blank(),
+    axis.line.x.top = element_blank()
+  )
 
 
 
