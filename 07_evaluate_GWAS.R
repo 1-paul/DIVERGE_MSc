@@ -45,7 +45,37 @@ manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#5
 # dev.off()
 
 
-qq(gwas_results_snps$P, main = "Q-Q plot of GWAS p-values")
+pvals <- gwas_results_snps$P
+pvals <- sort(na.omit(pvals))
+n <- length(pvals)
+
+# Expected and observed -log10(p)
+df <- data.frame(
+  expected = -log10(ppoints(n)),
+  observed = -log10(pvals),
+  lower = -log10(qbeta(0.025, 1:n, n:1)),
+  upper = -log10(qbeta(0.975, 1:n, n:1))
+)
+
+# Q-Q plot with shaded confidence interval
+ggplot(df, aes(x = expected, y = observed)) +
+	geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray90", alpha = 0.7) +
+	geom_point(size = 1, alpha = 0.7) +
+	geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+	labs(
+		x = "Expected -log10(p)",
+		y = "Observed -log10(p)"
+	) +
+	theme_bw(base_family = "CMU Serif") +
+	theme(
+		plot.title = element_text(size = 20, face = "bold"),
+		axis.title = element_text(size = 16),
+		axis.text = element_text(size = 14),
+		panel.border = element_blank(),
+		axis.line = element_line(color = "black", linewidth = 0.7)
+	)
+
+
 
 
 ### Manhattan plot using ggplot
