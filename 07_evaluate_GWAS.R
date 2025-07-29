@@ -16,7 +16,7 @@ gwas_results_snps <- gwas_results_snps %>%
 
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
-frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/02_call_rate_95g_95m.frq", header = TRUE, stringsAsFactors = FALSE)
+frq_data <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/QC/00_plink_files/08_hardy_final.frq", header = TRUE, stringsAsFactors = FALSE)
 
 significant_hits <- gwas_results_snps %>%
 	filter(P < 0.00001) %>%
@@ -41,8 +41,9 @@ significant_common_hits_maf <- gwas_results_snps %>%
 ### Manhattan & QQ plot using qqman package ---------------------------------------------------------
 
 # png("manhattan_plot.png", width=1200, height=600) 
-manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#d01c8b", "#980043"), ymax = 10)
+manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#5768f1", "#9ea7f7"), ylim = c(0, 8))
 # dev.off()
+
 
 qq(gwas_results_snps$P, main = "Q-Q plot of GWAS p-values")
 
