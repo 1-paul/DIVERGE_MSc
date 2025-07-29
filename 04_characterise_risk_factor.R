@@ -8,6 +8,7 @@ library(MASS)
 library(dplyr)
 library(ggplot2)
 library(patchwork)
+library(lm.beta) # for standardized coefficients of models
 
 
 ### Define symptoms -----------------------------------------------------------------------------
@@ -53,6 +54,11 @@ predictor <- "adversity_score"
 
 cases <- phenotype %>%
   filter(subject_type == 1)
+
+
+
+### Full model -----------------------------------------------------------------------------------------------
+model <- glm(formula = subject_type_logical ~ adversity_score + ethnic_self_provincial + screener_age + screener_sex, data = phenotype, family = binomial)
 
 
 
@@ -185,6 +191,8 @@ formula <- as.formula(paste("age_onset ~", predictor, "+ screener_age"))
 model <- lm(formula, data = cases)
 
 summary(model)
+model.beta <- lm.beta(model)
+summary(model.beta)
 
 
 
