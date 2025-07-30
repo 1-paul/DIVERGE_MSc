@@ -12,6 +12,13 @@ library(ggplot2)
 library(tidyr)
 library(qqman)
 
+library(extrafont)
+#font_import(paths = "~", pattern = "cmunrm", prompt = FALSE)
+loadfonts(device = "pdf")
+theme(text = element_text(family = "CMU Serif"))
+
+
+
 # Define which files to use
 ## Just change if script is to be adapted for different risk factor
 file_gxe_results_snps <- "/home/pbrandes/20250701_GxE/gxe_results_snp_edi_snpxedi_results_only.txt"
@@ -77,8 +84,9 @@ wider_df <- gxe_results_snps %>%
 		significant_gxe = if_else(P_gxe <= 0.05, "1", "0"),
 		significant_gxe = factor(significant_gxe, levels = c(0, 1)),
 		highly_sign_gxe = if_else(P_gxe <= 1e-5, "1", "0"),
-		highly_sign_gxe = factor(highly_sign_gxe, levels = c(0, 1))
-
+		highly_sign_gxe = factor(highly_sign_gxe, levels = c(0, 1)),
+		significant_both = if_else(P_snp <= 1e-5 | P_gxe <= 1e-5, "1", "0"),
+		significant_both = factor(significant_both, levels = c(0, 1))
 	)
 
 
@@ -188,39 +196,45 @@ wider_df %>% filter(!is.na(reported_in)) %>% select(ID, P_snp, P_gxe, reported_i
 
 ### Plot main effect pval vs interaction pval ####################################################################################################################################################################
 # png("1707_pgxe_vs_psnp_1.png", width=800, height=800)
+
+
 ggplot(wider_df, aes(x = log10_P_gxe, y = log10_P_snp)) +
 	# Switch between significant_gxe and highly_sign_gxe
-	geom_point(, alpha = 0.7) +
+	geom_point(aes(color = significant_both), alpha = 0.7) +
   
 	# Reference lines
-	geom_vline(xintercept = log10(0.05), linetype = "dashed", color = "blue", linewidth = 0.5) +
 	geom_vline(xintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
-	geom_vline(xintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
-	geom_vline(yintercept = log10(0.05), linetype = "dashed", color = "blue", linewidth = 0.5) +
+	geom_vline(xintercept = log10(5e-8), linetype = "dashed", color = "red", linewidth = 0.5) +
 	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
-	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
-	
-	# Scales
+	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "red", linewidth = 0.5) +
+	scale_color_manual(
+		values = c("1" = "#5768f1", "0" = "#969696")
+	) +
 	scale_y_reverse(
-		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)),
-		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8")
+		limits = log10(c(1, 5e-9)),
+		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9)),
+		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8", "1e-9"),
+		expand = c(0, 0)
 	) +
 	scale_x_reverse(
-			breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)),
-			labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8")
+		limits = log10(c(1, 5e-9)),
+		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9)),
+		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8", "1e-9"),
+		expand = c(0, 0)
 	) +
 	labs(
 		x = "P-value of the GxE interaction",
 		y = "P-value of the SNP main effect",
-		title = "P-value of SNP main effect vs. P-value of the GxE interaction"
 	) +
 	theme_bw() +
 	theme(
+		text = element_text(family = "CMU Serif"),
 		panel.grid.minor = element_blank(),
 		plot.title = element_text(hjust = 0.5, size = 20),
 		axis.title = element_text(size = 18),
 		axis.text = element_text(size = 16),
-		legend.title = element_text(size = 18),
-		legend.text = element_text(size = 16)
+		legend.position = "none",
+		panel.border = element_blank(),
+		axis.line = element_line(color = "black")
 	)
 
