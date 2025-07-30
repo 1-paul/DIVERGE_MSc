@@ -112,48 +112,56 @@ significant_interaction <- wider_df %>%
 
 ### plot beta of p-value vs beta of the interactions ####################################################################################################################################################################
 
-# png("1107_beta_vs_p_1.png", width=1000, height=800)
-ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_snp)) +
+# png("3007_beta_vs_p_2.png", width=1000, height=800)
+ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_gxe)) +
 	# Switc between significant_gxe and highly_sign_gxe
-	geom_point(aes(color = significant_gxe, size = significant_gxe), alpha = 0.7) +
+	geom_point(aes(color = highly_sign_gxe, size = highly_sign_gxe), alpha = 0.7) +
   
 	# Reference lines
 	geom_vline(xintercept = 0, linetype = "dashed", color = "red", linewidth = 0.5) +
 	geom_hline(yintercept = log10(1e-5), linetype = "dashed", color = "blue", linewidth = 0.5) +
-	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "blue", linewidth = 0.5) +
+	geom_hline(yintercept = log10(5e-8), linetype = "dashed", color = "red", linewidth = 0.5) +
 	
 	# Scales
 	scale_y_reverse(
+		limits = log10(c(1, 5e-9)),
 		breaks = log10(c(1, 0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)),
-		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8")
+		labels = c("1", "1e-1", "1e-2", "1e-3", "1e-4", "1e-5", "1e-6", "1e-7", "1e-8"),
+		expand = c(0, 0)
 	) +
 	scale_color_manual(
-		values = c("1" = "#08519c", "0" = "#969696"),
+		values = c("1" = "#5768f1", "0" = "#969696"),
 		name = "GxE Significance",
 		labels = c("1" = "Significant Interaction (<= 0.05)", "0" = "No Significant Interaction")
 	) +
 	scale_size_manual(
-		values = c("1" = 1.6, "0" = 0.8),  
+		values = c("1" = 1, "0" = 1),  
 		guide = "none"  # Hide size legend since redundant with color
 	) +
 	
 	# Labels
-	labs(
-		x = "Log Odds Ratio (GxE Interaction)",
-		y = "P-value (log10 scale)",
-		title = "P-value of SNP main effect vs. Odds of Interaction"
-	) +
+	#labs(
+		#x = "Beta (GxE)",
+		#y = "P-value (GxE)",
+	#) +
 	
 	# Theme
 	theme_bw() +
 	theme(
+		text = element_text(family = "CMU Serif"),
 		panel.grid.minor = element_blank(),
 		plot.title = element_text(hjust = 0.5, size = 20),
-		axis.title = element_text(size = 18),
+		axis.title.x = element_blank(),
+		axis.title.y = element_blank(),
 		axis.text = element_text(size = 16),
 		legend.title = element_text(size = 18),
-		legend.text = element_text(size = 16)
+		legend.text = element_text(size = 16),
+		legend.position = "none",
+		panel.border = element_blank(),
+		axis.line = element_line(color = "black")
 	)
+
+
 
 
 
@@ -231,7 +239,8 @@ ggplot(wider_df, aes(x = log10_P_gxe, y = log10_P_snp)) +
 		text = element_text(family = "CMU Serif"),
 		panel.grid.minor = element_blank(),
 		plot.title = element_text(hjust = 0.5, size = 20),
-		axis.title = element_text(size = 18),
+		axis.title.x = element_blank(),
+		axis.title.y = element_blank(),
 		axis.text = element_text(size = 16),
 		legend.position = "none",
 		panel.border = element_blank(),
