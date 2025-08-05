@@ -102,13 +102,15 @@ print(results_df)
 
 
 
-### Conditional logistic regressions for age-matched case/controls after running "02_age_matching.R" ----------------------------------------------------------------------------------------------
+### Conditional logistic regressions for age-matched case/controls after running "02_age_matching.R" 
 # Establish storage variables
 pvals <- numeric(length(predictors))
 estimates <- numeric(length(predictors))
-names(pvals) <- names(estimates) <- predictors
+lower_ci <- numeric(length(predictors))
+upper_ci <- numeric(length(predictors))
+names(pvals) <- names(estimates) <- names(lower_ci) <- names(upper_ci) <- predictors
 
-# Run conditional logistic regressions and extract p-values and estimates
+# Run conditional logistic regressions and extract p-values, estimates, and CIs
 for (i in seq_along(predictors)) {
   formula <- as.formula(paste("subject_type_logical ~", predictors[i], "+ strata(subclass)"))
   model <- clogit(formula, data = matched_data)
@@ -116,8 +118,11 @@ for (i in seq_along(predictors)) {
   
   # Extract p-value
   pvals[i] <- coef(smry)[predictors[i], "Pr(>|z|)"]
-  # Extract odds
+  # Extract odds ratio
   estimates[i] <- coef(smry)[predictors[i], "exp(coef)"]
+  # Extract 95% CI
+  lower_ci[i] <- smry$conf.int[predictors[i], "lower .95"]
+  upper_ci[i] <- smry$conf.int[predictors[i], "upper .95"]
 }
 
 # Apply multiple testing correction
@@ -126,10 +131,11 @@ pvals_corrected <- p.adjust(pvals, method = "bonferroni")
 # Combine into a data frame
 results_df <- data.frame(
   Predictor = predictors,
-  Odds = estimates,
+  Odds_Ratio = estimates,
+  CI_lower = lower_ci,
+  CI_upper = upper_ci,
   P_Value = pvals,
   Adjusted_P = pvals_corrected
 )
 
 print(results_df)
-
