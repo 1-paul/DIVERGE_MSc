@@ -38,7 +38,7 @@ snps_ArnauSoler <- "snps_ArnauSoler_2019.txt"
 ### Correctly format GxE results ####################################################################################################################################################################
 gxe_results_snps <- read.table(file_gxe_results_snps, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG_OR_SE", "Z_STAT", "P")
+colnames(gxe_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOGOR_SE", "Z_STAT", "P")
 
 gxe_results_snps <- gxe_results_snps %>% 
 	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
@@ -46,6 +46,7 @@ gxe_results_snps <- gxe_results_snps %>%
 	mutate(CHROM = as.numeric(CHROM)) %>%
 	filter(CHROM <= 22) %>% # Autosomes only
 	filter(!is.na(P))
+
 
 
 
@@ -74,7 +75,7 @@ wider_df <- gxe_results_snps %>%
  	pivot_wider(
     		id_cols = c(CHROM, POS, ID, REF, ALT, A1, OBS_CT),
     		names_from = suffix,
-    		values_from = c(OR, LOG_OR_SE, Z_STAT, P),
+    		values_from = c(OR, LOGOR_SE, Z_STAT, P),
     		names_glue = "{.value}{suffix}"
 	) %>%
   	mutate(
@@ -86,8 +87,11 @@ wider_df <- gxe_results_snps %>%
 		highly_sign_gxe = if_else(P_gxe <= 1e-5, "1", "0"),
 		highly_sign_gxe = factor(highly_sign_gxe, levels = c(0, 1)),
 		significant_both = if_else(P_snp <= 1e-5 | P_gxe <= 1e-5, "1", "0"),
-		significant_both = factor(significant_both, levels = c(0, 1))
-	)
+		significant_both = factor(significant_both, levels = c(0, 1)),
+		log_or_gxe = log(OR_gxe),
+		CI_lower_gxe = exp(log_or_gxe - 1.96 * LOGOR_SE_gxe),
+		CI_upper_gxe = exp(log_or_gxe + 1.96 * LOGOR_SE_gxe)
+		)
 
 
 
@@ -105,8 +109,7 @@ significant_results <- wider_df %>%
 
 ### Get significant interaction
 significant_interaction <- wider_df %>%
-	arrange(P_gxe) %>%
-	head(20)
+	arrange(P_gxe)
 
 
 
