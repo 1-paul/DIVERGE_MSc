@@ -5,14 +5,20 @@ library(qqman)
 
 gwas_results_snps <- read.table("/cluster/project2/DIVERGE/20250620_GWAS/GWAS/00_gwas_results_snp_results_only.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOG(OR)_SE", "Z_STAT", "P")
+colnames(gwas_results_snps) <- c("CHROM", "POS", "ID", "REF", "ALT", "A1", "TEST", "OBS_CT", "OR", "LOGOR_SE", "Z_STAT", "P")
 
 gwas_results_snps <- gwas_results_snps %>% 
 	mutate(CHROM = case_when(CHROM == "Y" ~ "23",CHROM == "XY" ~ "24",CHROM == "MT" ~ "25",TRUE ~ as.character(CHROM))) %>%
 	filter(CHROM != 0) %>%
 	mutate(CHROM = as.numeric(CHROM)) %>%
 	filter(CHROM <= 22) %>% # Autosomes only
-	filter(!is.na(P))
+	filter(!is.na(P)) %>%
+	mutate(
+		log_or = log(OR),
+		CI_lower = exp(log_or - 1.96 * LOGOR_SE),
+		CI_upper = exp(log_or + 1.96 * LOGOR_SE)
+	)
+
 
 
 ### Get minor allele frequencies of significant variants --------------------------------------------------
