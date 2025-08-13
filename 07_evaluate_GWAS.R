@@ -57,17 +57,17 @@ manhattan(gwas_results_snps, chr="CHROM", bp="POS", snp="ID", p="P", col = c("#5
 
 ### QQ plot (ggplot) #############################################################################################
 pvals <- gwas_results_snps %>%
-  pull(P) %>%        # Extract as vector
-  na.omit() %>%
-  sort()
+	pull(P) %>%        # Extract as vector
+	na.omit() %>%
+	sort()
 
 n <- length(pvals)
 
 qq_df <- data.frame(
-  expected = -log10(ppoints(n)),
-  observed = -log10(pvals),
-  lower = -log10(qbeta(0.025, 1:n, n:1)),
-  upper = -log10(qbeta(0.975, 1:n, n:1))
+	expected = -log10(ppoints(n)),
+	observed = -log10(pvals),
+	lower = -log10(qbeta(0.025, 1:n, n:1)),
+	upper = -log10(qbeta(0.975, 1:n, n:1))
 )
 
 ggplot(qq_df, aes(x = expected, y = observed)) +
