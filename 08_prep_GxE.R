@@ -10,13 +10,13 @@ covariates <- read.table(
     header = TRUE,
     sep = "\t",          
     comment.char = ""
-    )
+)
 
 freeze2_ids <- read.table(
     "/cluster/project2/DIVERGE/munim_workspace/QC_pipeline_20250514/09_batch_effects/freeze2_ids.txt",
     header = FALSE,
     col.names = c("FID", "IID") 
-    )
+)
 
 
 
@@ -32,10 +32,11 @@ combined_df <- combined_df %>%
     select("#FID", IID, everything())
 
 # Output new covariates file
-write.table(combined_df, 
-           "covariates2.txt", 
-           sep = "\t", 
-           quote = FALSE, 
-           row.names = FALSE,
-           col.names = TRUE
-           )
+write.table(
+    combined_df, 
+    "covariates2.txt", 
+    sep = "\t", 
+    quote = FALSE, 
+    row.names = FALSE,
+    col.names = TRUE
+)
