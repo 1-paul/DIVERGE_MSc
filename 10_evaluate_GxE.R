@@ -140,6 +140,7 @@ ggplot(wider_df, aes(x = LOG_OR_gxe, y = log10_P_gxe)) +
 
 
 ### Find SNPs which have been reported as having singificant interactions in other papers ###########################################################################
+# All SNPs were manually extracted from papers, so processing is not standardised
 df_coleman <- read.table(snps_coleman, sep = "\t", header = FALSE, stringsAsFactors = FALSE)
 df_coleman <- df_coleman %>%
 	filter(V12 <= 1e-5) %>%
