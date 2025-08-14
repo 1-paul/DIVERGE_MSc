@@ -1,42 +1,35 @@
+#############################################################################################
+### Summary:
+### 1. Merge phenotype and genetic data
+#############################################################################################
+
 library(dplyr)
 
-
-# Filter phenotype
-risk_factor_df <- phenotype %>%
-    select(subject_id, early_domestic_issues, adversity_score)
-
-
-# Load covariates file
 covariates <- read.table(
     "/cluster/project2/DIVERGE/20250620_GWAS/GWAS/covariates.txt",
     header = TRUE,
     sep = "\t",          
-    comment.char = ""    # Disable skipping lines starting with #
-)
+    comment.char = ""
+    )
 
-
-# Merge by ID, just adding risk_factor_df
-combined_df <- merge(covariates, risk_factor_df, by.x = "IID", by.y = "subject_id")
-
-
-# Load freeze2 IDs file
 freeze2_ids <- read.table(
     "/cluster/project2/DIVERGE/munim_workspace/QC_pipeline_20250514/09_batch_effects/freeze2_ids.txt",
     header = FALSE,
-    col.names = c("FID", "IID")  # Naming columns for clarity
-)
+    col.names = c("FID", "IID") 
+    )
 
 
-# Create freeze variable (2 for freeze 2 individuals, 1 for freeze 1 individuals)
+
+### Merge relevant variables of the phenotype data with the genetic data ##############################################################################################
+relevant_pheno <- phenotype %>%
+    select(subject_id, early_domestic_issues, adversity_score)
+
+combined_df <- merge(covariates, relevant_pheno, by.x = "IID", by.y = "subject_id")
+
 combined_df <- combined_df %>%
-  mutate(freeze = if_else(IID %in% freeze2_ids$IID, 2, 1))
-
-
-# Rename columns and remove unwanted columns
-combined_df <- combined_df %>%
-  rename("#FID" = FID) %>%  # Rename X.FID
-  select("#FID", IID, everything())
-
+    mutate(freeze = if_else(IID %in% freeze2_ids$IID, 2, 1)) %>% # Create batch variable (1 for freeze 1 individuals, 2 for freeze 2 individuals)
+    rename("#FID" = FID) %>% 
+    select("#FID", IID, everything())
 
 # Output new covariates file
 write.table(combined_df, 
@@ -44,4 +37,5 @@ write.table(combined_df,
            sep = "\t", 
            quote = FALSE, 
            row.names = FALSE,
-           col.names = TRUE)
+           col.names = TRUE
+           )
