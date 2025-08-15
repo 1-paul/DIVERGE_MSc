@@ -141,35 +141,48 @@ print(combined)
 
 ### Run ordinal logistic regressions -----------------------------------------------------------------------------------------------
 ## An ordinal logistic regressions is necessary since all the indicators of severity are ordered categorical variable e.g. "Low," "Medium," "High" 
-
 # Initialize results list
 results_list <- list()
 
 # Loop over each symptom
 for (symptom in symptoms) {
-	# Create formula
-	formula <- as.formula(paste0("as.ordered(", symptom, ") ~ ", predictor, "+ screener_age"))
-	# Fit ordinal logistic regression model
-	model <- polr(formula, data = cases, Hess = TRUE)
-	smry <- summary(model)
-	# Extract coefficient table
-	coef_table <- coef(smry)
-	# Check if predictor is in the model
-	if (predictor %in% rownames(coef_table)) {
-		estimate <- exp(coef_table[predictor, "Value"])  # Odds ratio (exponentiated coefficient)
-    		t_value <- coef_table[predictor, "t value"]
-		p_value <- 2 * (1 - pnorm(abs(t_value)))        # Wald test p-value
-	} else {
-		estimate <- NA
-		p_value <- NA
-	}
-	# Store result
-	results_list[[length(results_list) + 1]] <- data.frame(
-		Symptom = symptom,
-		Predictor = predictor,
-		Estimate = estimate,
-		P_Value = p_value
-	)
+  # Create formula
+  formula <- as.formula(paste0("as.ordered(", symptom, ") ~ ", predictor, " + screener_age"))
+  
+  # Fit ordinal logistic regression model
+  model <- polr(formula, data = cases, Hess = TRUE)
+  smry <- summary(model)
+  
+  # Extract coefficient table
+  coef_table <- coef(smry)
+  
+  # Check if predictor is in the model
+  if (predictor %in% rownames(coef_table)) {
+    # Calculate odds ratio (exponentiated coefficient)
+    estimate <- exp(coef_table[predictor, "Value"])
+    t_value <- coef_table[predictor, "t value"]
+    p_value <- 2 * (1 - pnorm(abs(t_value))) # Wald test p-value
+    
+    # Calculate confidence intervals (on log-odds scale, then exponentiate)
+    ci <- exp(confint(model, parm = predictor))
+    lower_ci <- ci[1]
+    upper_ci <- ci[2]
+  } else {
+    estimate <- NA
+    p_value <- NA
+    lower_ci <- NA
+    upper_ci <- NA
+  }
+  
+  # Store result
+  results_list[[symptom]] <- data.frame(
+    Symptom = symptom,
+    Predictor = predictor,
+    CI_lower = lower_ci,
+    CI_upper = upper_ci,
+    Estimate = estimate,
+    P_Value = p_value
+  )
 }
 
 # Combine all results into a dataframe
@@ -177,9 +190,9 @@ results_df <- do.call(rbind, results_list)
 
 # Adjust p-values for multiple testing (Bonferroni) 
 results_df$Adjusted_P <- p.adjust(results_df$P_Value, method = "bonferroni")
+
 # Print results
 print(results_df)
-
 
 
 ### Regression for Age of Onset -------------------------------------------------------------------------------------
